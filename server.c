@@ -35,7 +35,8 @@ int req_next_to_retrieve = -1;
 int cache_next_to_store = 0;
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t request_cv  = PTHREAD_COND_INITIALIZER;
+pthread_cond_t some_request  = PTHREAD_COND_INITIALIZER;
+pthred_cond_t request_space = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cache_cv  = PTHREAD_COND_INITIALIZER;
 
 // structs:
@@ -133,13 +134,20 @@ int getCurrentTimeInMills() {
 void * dispatch(void *arg) {
 
   while (1) {
-
+      pthread_mutex_lock(&lock);
     // Accept client connection
-
+      int fd = accept_connection():
     // Get request from the client
-
+      char filename[1024];
+      get_request(fd, filename);
     // Add the request into the queue
-
+      struct request_t request = {fd, filename};
+      while(req_next_to_store == req_next_to_retrieve){
+          pthread_cond_wait(&lock, &request_space);
+      }
+      requests[req_next_to_store] = request;
+      pthread_cond_signal(&some_request);
+      pthread_mutex_unlock(&lock);
    }
    return NULL;
 }
@@ -236,10 +244,6 @@ int main(int argc, char **argv) {
   pthread_t workers[num_workers];
 
   // Clean up
-<<<<<<< HEAD
-
-=======
-    deleteCache();
->>>>>>> 8b4aef9e04ecef7803f2e5d0b4afc97968709946
+  deleteCache();
   return 0;
 }
