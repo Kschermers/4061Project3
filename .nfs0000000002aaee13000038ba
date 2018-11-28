@@ -136,48 +136,17 @@ void * dispatch(void *arg) {
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
   int start, stop, elapsed;
-  int cache_idx;
-  cache_entry_t current_entry;
-  request_t current_req;
+  request_t current;
 
   while (1) {
-    pthread_mutex_lock(&lock);
-
-    // wait until request queue is not empty
-    while (req_next_to_store == (req_next_to_retrieve + 1)) {
-      pthread_cond_wait(&request_exists, &lock);
-    }
-
     // Start recording time
     start = getCurrentTimeInMills();
 
     // Get the request from the queue
-    current_req = requests[req_next_to_retrieve];
-    // update index tracker for queue
-    if(req_next_to_retrieve == (qlen-1)) {
-      req_next_to_retrieve = 0;
-    } else {
-      req_next_to_retrieve++;
-    }
 
-    pthread_mutex_unlock(&lock);
 
-    // a request has been handled so signal to a
-    // dispatcher to handle a new one
-    pthread_cond_signal(&space_for_request);
-
-    // reacquire lock to begin working on cache
-    pthread_mutex_lock(&lock);
-
-    // TODO Get the data from the disk or the cache
-    cache_idx = getCacheIndex(current_req.request);
-    if (cache_idx != -1) {
-      // req is in cache
-      current_entry = cache[cache_idx];
-    } else {
-      // req is not in cache
-
-    }
+    // Get the data from the disk or the cache
+    (getCacheIndex(&current) != -1)
 
     // Stop recording the time
     stop = getCurrentTimeInMills();
@@ -185,11 +154,9 @@ void * worker(void *arg) {
 
 
     // Log the request into the file and terminal
-
+    printf();
 
     // return the result
-
-    pthread_mutex_unlock(&lock);
   }
   return NULL;
 }
@@ -200,41 +167,51 @@ int main(int argc, char **argv) {
 
   // Error check on number of arguments
   // Decided to check if caching is enabled [argc == 8 -> Caching enabled]
-  if(argc != 8){
+  if(argc != 7 && argc != 8){
     printf("usage: %s port path num_dispatcher num_workers dynamic_flag queue_length cache_size\n", argv[0]);
     return -1;
   }
 
-  // get the input arguments
-  port = atoi(argv[1]);
-  path = argv[2];
-  num_dispatcher=atoi(argv[3]);
-  num_workers=atoi(argv[4]);
-  dynamic_flag = atoi(argv[5]);
-  qlen = atoi(argv[6]);
-  cache_entries=atoi(argv[7]);
-
+  // Get the input args
+    if(argc==7){
+        port = atoi(argv[1]);
+        path = argv[2];
+        num_dispatcher=atoi(argv[3]);
+        num_workers=atoi(argv[4]);
+        dynamic_flag = 0;
+        qlen = atoi(argv[5]);
+        cache_entries=atoi(argv[6]);
+    }
+    else if(argc==8){
+        port = atoi(argv[1]);
+        path = argv[2];
+        num_dispatcher=atoi(argv[3]);
+        num_workers=atoi(argv[4]);
+        dynamic_flag = atoi(argv[5]);
+        qlen = atoi(argv[6]);
+        cache_entries=atoi(argv[7]);
+    }
   // Perform error checks on the input arguments
-  if(port < 1025 || port > 65535){
-      printf("port #%d is invalid.\n", port);
-      return -1;
-  }
-  if(num_workers > MAX_THREADS || num_workers <= 0){
-      printf("num_workers #%d is invalid.\n", num_workers);
-      return -1;
-  }
-  if(num_dispatcher > MAX_THREADS || num_workers <= 0){
-      printf("num_dispatchers #%d is invalid.\n", num_dispatcher);
-      return -1;
-  }
-  if(qlen > MAX_queue_len || qlen <= 0){
-      printf("queue length #%d is invalid.\n", qlen);
-      return -1;
-  }
-  if(cache_entries > MAX_CE || cache_entries <= 0){
-      printf("cache entries #%d is invalid.\n", cache_entries);
-      return -1;
-  }
+    if(port < 1025 || port > 65535){
+        printf("port #%d is invalid.\n", port);
+        return -1;
+    }
+    if(num_workers > MAX_THREADS || num_workers <= 0){
+        printf("num_workers #%d is invalid.\n", num_workers);
+        return -1;
+    }
+    if(num_dispatcher > MAX_THREADS || num_workers <= 0){
+        printf("num_dispatchers #%d is invalid.\n", num_dispatcher);
+        return -1;
+    }
+    if(qlen > MAX_queue_len || qlen <= 0){
+        printf("queue length #%d is invalid.\n", qlen);
+        return -1;
+    }
+    if(cache_entries > MAX_CE || cache_entries <= 0){
+        printf("cache entries #%d is invalid.\n", cache_entries);
+        return -1;
+    }
   // Change the current working directory to server root directory
   chdir(path);
 
@@ -246,5 +223,6 @@ int main(int argc, char **argv) {
   pthread_t workers[num_workers];
 
   // Clean up
+
   return 0;
 }
