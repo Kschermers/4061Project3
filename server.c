@@ -74,7 +74,7 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
 
 // clear the memory allocated to the cache
 void deleteCache(){
-  // De-allocate/free the cache memory
+    free(cache);
 }
 
 // Function to initialize the cache
@@ -204,5 +204,6 @@ int main(int argc, char **argv) {
   pthread_t* workers[num_workers];
 
   // Clean up
+    deleteCache();
   return 0;
 }
