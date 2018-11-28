@@ -21,7 +21,13 @@
 /*
   THE CODE STRUCTURE GIVEN BELOW IS JUST A SUGESSTION. FEEL FREE TO MODIFY AS NEEDED
 */
-
+int port;
+char* path;
+int num_dispatcher;
+int num_workers;
+int dynamic_flag;
+int qlen;
+int cache_entries;
 // structs:
 typedef struct request_queue {
    int fd;
@@ -141,7 +147,24 @@ int main(int argc, char **argv) {
   }
 
   // Get the input args
-
+    if(argc==7){
+        port = atoi(argv[1]);
+        path = argv[2];
+        num_dispatcher=atoi(argv[3]);
+        num_workers=atoi(argv[4]);
+        dynamic_flag = 0;
+        qlen = atoi(argv[5]);
+        cache_entries=atoi(argv[6]);
+    }
+    else if(argc==8){
+        port = atoi(argv[1]);
+        path = argv[2];
+        num_dispatcher=atoi(argv[3]);
+        num_workers=atoi(argv[4]);
+        dynamic_flag = atoi(argv[5]);
+        qlen = atoi(argv[6]);
+        cache_entries=atoi(argv[7]);
+    }
   // Perform error checks on the input arguments
 
   // Change the current working directory to server root directory
