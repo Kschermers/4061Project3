@@ -117,17 +117,17 @@ void * dispatch(void *arg) {
 
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
-
-   while (1) {
+  clock_t start, stop;
+  while (1) {
 
     // Start recording time
-
+    start = clock();
     // Get the request from the queue
 
     // Get the data from the disk or the cache
 
     // Stop recording the time
-
+    stop = clock();
     // Log the request into the file and terminal
 
     // return the result
@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
 
   // Change the current working directory to server root directory
   chdir(path);
-  
+
   // Start the server and initialize cache
 
   // Create dispatcher and worker threads
