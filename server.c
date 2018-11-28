@@ -130,12 +130,16 @@ void * worker(void *arg) {
 
     // Start recording time
     start = clock();
+
     // Get the request from the queue
+
 
     // Get the data from the disk or the cache
 
+
     // Stop recording the time
     stop = clock();
+
     // Log the request into the file and terminal
 
     // return the result
@@ -179,10 +183,11 @@ int main(int argc, char **argv) {
   chdir(path);
 
   // Start the server and initialize cache
-    initCache();
+  initCache();
+
   // Create dispatcher and worker threads
-  pthread_t* dispatchers[num_dispatch];
-  pthread_t* workers[num_workers];
+  pthread_t dispatchers[num_dispatch];
+  pthread_t workers[num_workers];
 
   // Clean up
   return 0;
