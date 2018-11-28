@@ -166,7 +166,26 @@ int main(int argc, char **argv) {
         cache_entries=atoi(argv[7]);
     }
   // Perform error checks on the input arguments
-
+    if(port < 1025 || port > 65535){
+        printf("port #%d is invalid.\n", port);
+        return -1;
+    }
+    if(num_workers > MAX_THREADS || num_workers <= 0){
+        printf("num_workers #%d is invalid.\n", num_workers);
+        return -1;
+    }
+    if(num_dispatcher > MAX_THREADS || num_workers <= 0){
+        printf("num_dispatchers #%d is invalid.\n", num_dispatcher);
+        return -1;
+    }
+    if(qlen > MAX_queue_len || qlen <= 0){
+        printf("queue length #%d is invalid.\n", qlen);
+        return -1;
+    }
+    if(cache_entries > MAX_CE || cache_entries <= 0){
+        printf("cache entries #%d is invalid.\n", cache_entries);
+        return -1;
+    }
   // Change the current working directory to server root directory
   chdir(path);
   
