@@ -28,6 +28,7 @@ int num_workers;
 int dynamic_flag;
 int qlen;
 int cache_entries;
+
 // structs:
 typedef struct request_queue {
    int fd;
@@ -39,6 +40,8 @@ typedef struct cache_entry {
     char *request;
     char *content;
 } cache_entry_t;
+
+cache_entry_t *cache;
 
 /* ************************ Dynamic Pool Code ***********************************/
 // Extra Credit: This function implements the policy to change the worker thread pool dynamically
@@ -55,7 +58,12 @@ void * dynamic_pool_size_update(void *arg) {
 
 // Function to check whether the given request is present in cache
 int getCacheIndex(char *request){
-  /// return the index if the request is present in the cache
+    for(int i = 0; i < cache_entries; i++) {
+        if (strcmp(cache[i].request,request) == 0) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 // Function to add the request and its file content into the cache
@@ -71,7 +79,7 @@ void deleteCache(){
 
 // Function to initialize the cache
 void initCache(){
-  // Allocating memory and initializing the cache array
+    cache = (cache_entry_t *) malloc(sizeof(cache_entry_t) * cache_entries);
 }
 
 // Function to open and read the file from the disk into the memory
@@ -117,17 +125,17 @@ void * dispatch(void *arg) {
 
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
-
-   while (1) {
+  clock_t start, stop;
+  while (1) {
 
     // Start recording time
-
+    start = clock();
     // Get the request from the queue
 
     // Get the data from the disk or the cache
 
     // Stop recording the time
-
+    stop = clock();
     // Log the request into the file and terminal
 
     // return the result
@@ -188,9 +196,9 @@ int main(int argc, char **argv) {
     }
   // Change the current working directory to server root directory
   chdir(path);
-  
-  // Start the server and initialize cache
 
+  // Start the server and initialize cache
+    initCache();
   // Create dispatcher and worker threads
   pthread_t* dispatchers[num_dispatch];
   pthread_t* workers[num_workers];
