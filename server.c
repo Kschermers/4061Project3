@@ -29,6 +29,15 @@ int dynamic_flag;
 int qlen;
 int cache_entries;
 
+// request and cache indices
+int req_next_to_store = 0;
+int req_next_to_retrieve = -1;
+int cache_next_to_store = 0;
+
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t request_cv  = PTHREAD_COND_INITIALIZER;
+pthread_cond_t cache_cv  = PTHREAD_COND_INITIALIZER;
+
 // structs:
 typedef struct request_queue {
    int fd;
@@ -42,6 +51,7 @@ typedef struct cache_entry {
 } cache_entry_t;
 
 cache_entry_t *cache;
+request_t *requests;
 
 /* ************************ Dynamic Pool Code ***********************************/
 // Extra Credit: This function implements the policy to change the worker thread pool dynamically
@@ -125,22 +135,26 @@ void * dispatch(void *arg) {
 
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
-  clock_t start, stop;
-  while (1) {
+  int start, stop, elapsed;
+  request_t current;
 
+  while (1) {
     // Start recording time
-    start = clock();
+    start = getCurrentTimeInMills();
 
     // Get the request from the queue
 
 
     // Get the data from the disk or the cache
-
+    (getCacheIndex(&current) != -1)
 
     // Stop recording the time
-    stop = clock();
+    stop = getCurrentTimeInMills();
+    elapsed = stop - start;
+
 
     // Log the request into the file and terminal
+    printf();
 
     // return the result
   }
@@ -209,5 +223,6 @@ int main(int argc, char **argv) {
   pthread_t workers[num_workers];
 
   // Clean up
+
   return 0;
 }
