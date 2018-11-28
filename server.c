@@ -35,8 +35,8 @@ int req_next_to_retrieve = -1;
 int cache_next_to_store = 0;
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t some_request  = PTHREAD_COND_INITIALIZER;
-pthred_cond_t request_space = PTHREAD_COND_INITIALIZER;
+pthread_cond_t request_exists  = PTHREAD_COND_INITIALIZER;
+pthred_cond_t space_for_request = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cache_cv  = PTHREAD_COND_INITIALIZER;
 
 // structs:
@@ -154,10 +154,10 @@ void * dispatch(void *arg) {
     // Add the request into the queue
       struct request_t request = {fd, filename};
       while(req_next_to_store == req_next_to_retrieve){
-          pthread_cond_wait(&lock, &request_space);
+          pthread_cond_wait(&lock, &space_for_request);
       }
       requests[req_next_to_store] = request;
-      pthread_cond_signal(&some_request);
+      pthread_cond_signal(&request_exists);
       pthread_mutex_unlock(&lock);
    }
    return NULL;
