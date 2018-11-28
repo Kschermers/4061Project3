@@ -70,6 +70,7 @@ int getCacheIndex(char *request){
 void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memeory when adding or replacing cache entries
+    
 }
 
 // clear the memory allocated to the cache
