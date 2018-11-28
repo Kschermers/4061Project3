@@ -99,6 +99,16 @@ int readFromDisk(/*necessary arguments*/) {
   // Open and read the contents of file given the request
 }
 
+void IncrementCacheNextToStore() {
+    cache_next_to_store++;
+    
+    if (cache_next_to_store == cache_entries) {
+        cache_next_to_store = 0;
+    }
+}
+
+
+
 /**********************************************************************************/
 
 /* ************************************ Utilities ********************************/
