@@ -81,6 +81,7 @@ int getCacheIndex(char *request){
 void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memeory when adding or replacing cache entries
+    
 }
 
 // clear the memory allocated to the cache
@@ -98,6 +99,16 @@ void initCache(){
 int readFromDisk(/*necessary arguments*/) {
   // Open and read the contents of file given the request
 }
+
+void IncrementCacheNextToStore() {
+    cache_next_to_store++;
+    
+    if (cache_next_to_store == cache_entries) {
+        cache_next_to_store = 0;
+    }
+}
+
+
 
 /**********************************************************************************/
 
