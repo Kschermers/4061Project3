@@ -81,7 +81,7 @@ int getCacheIndex(char *request){
 void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memeory when adding or replacing cache entries
-    
+
 }
 
 // clear the memory allocated to the cache
@@ -102,7 +102,7 @@ int readFromDisk(/*necessary arguments*/) {
 
 void IncrementCacheNextToStore() {
     cache_next_to_store++;
-    
+
     if (cache_next_to_store == cache_entries) {
         cache_next_to_store = 0;
     }
@@ -265,9 +265,6 @@ int main(int argc, char **argv) {
   pthread_t workers[num_workers];
 
   // Clean up
-<<<<<<< HEAD
-=======
   deleteCache();
->>>>>>> 666632ca6a12c2628355e5fc70f8589e215bf274
   return 0;
 }
