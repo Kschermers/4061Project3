@@ -28,6 +28,7 @@ int num_workers;
 int dynamic_flag;
 int qlen;
 int cache_entries;
+
 // structs:
 typedef struct request_queue {
    int fd;
@@ -39,6 +40,8 @@ typedef struct cache_entry {
     char *request;
     char *content;
 } cache_entry_t;
+
+cache_entry_t *cache;
 
 /* ************************ Dynamic Pool Code ***********************************/
 // Extra Credit: This function implements the policy to change the worker thread pool dynamically
@@ -71,7 +74,7 @@ void deleteCache(){
 
 // Function to initialize the cache
 void initCache(){
-  // Allocating memory and initializing the cache array
+    cache = (cache_entry_t *) malloc(sizeof(cache_entry_t) * cache_entries);
 }
 
 // Function to open and read the file from the disk into the memory
@@ -171,7 +174,7 @@ int main(int argc, char **argv) {
   chdir(path);
   
   // Start the server and initialize cache
-
+    initCache();
   // Create dispatcher and worker threads
   pthread_t* dispatchers[num_dispatch];
   pthread_t* workers[num_workers];
