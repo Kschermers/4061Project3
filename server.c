@@ -145,10 +145,13 @@ int main(int argc, char **argv) {
   // Perform error checks on the input arguments
 
   // Change the current working directory to server root directory
-
+  chdir(path);
+  
   // Start the server and initialize cache
 
   // Create dispatcher and worker threads
+  pthread_t* dispatchers[num_dispatch];
+  pthread_t* workers[num_workers];
 
   // Clean up
   return 0;
