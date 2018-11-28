@@ -58,7 +58,12 @@ void * dynamic_pool_size_update(void *arg) {
 
 // Function to check whether the given request is present in cache
 int getCacheIndex(char *request){
-  /// return the index if the request is present in the cache
+    for(int i = 0; i < cache_entries; i++) {
+        if (strcmp(cache[i].request,request) == 0) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 // Function to add the request and its file content into the cache
