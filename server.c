@@ -35,7 +35,8 @@ int req_next_to_retrieve = -1;
 int cache_next_to_store = 0;
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t request_cv  = PTHREAD_COND_INITIALIZER;
+pthread_cond_t request_exists  = PTHREAD_COND_INITIALIZER;
+pthred_cond_t space_for_request = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cache_cv  = PTHREAD_COND_INITIALIZER;
 
 // structs:
@@ -80,6 +81,7 @@ int getCacheIndex(char *request){
 void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memeory when adding or replacing cache entries
+    
 }
 
 // clear the memory allocated to the cache
@@ -97,6 +99,16 @@ void initCache(){
 int readFromDisk(/*necessary arguments*/) {
   // Open and read the contents of file given the request
 }
+
+void IncrementCacheNextToStore() {
+    cache_next_to_store++;
+    
+    if (cache_next_to_store == cache_entries) {
+        cache_next_to_store = 0;
+    }
+}
+
+
 
 /**********************************************************************************/
 
@@ -120,13 +132,20 @@ int getCurrentTimeInMills() {
 void * dispatch(void *arg) {
 
   while (1) {
-
+      pthread_mutex_lock(&lock);
     // Accept client connection
-
+      int fd = accept_connection():
     // Get request from the client
-
+      char filename[1024];
+      get_request(fd, filename);
     // Add the request into the queue
-
+      struct request_t request = {fd, filename};
+      while(req_next_to_store == req_next_to_retrieve){
+          pthread_cond_wait(&lock, &space_for_request);
+      }
+      requests[req_next_to_store] = request;
+      pthread_cond_signal(&request_exists);
+      pthread_mutex_unlock(&lock);
    }
    return NULL;
 }
@@ -246,5 +265,9 @@ int main(int argc, char **argv) {
   pthread_t workers[num_workers];
 
   // Clean up
+<<<<<<< HEAD
+=======
+  deleteCache();
+>>>>>>> 666632ca6a12c2628355e5fc70f8589e215bf274
   return 0;
 }
