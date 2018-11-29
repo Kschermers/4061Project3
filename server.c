@@ -1,3 +1,12 @@
+/***********************************/
+/*  CSCI 4061 F18
+ *  Project 3
+ *  Group 1
+ *  Names: Nicole Walker, Samuel Ball, Kadin Schermers
+ *  X500s: walk0760, ballx188, scher528
+ */
+ 
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
