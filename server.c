@@ -67,9 +67,15 @@ request_t *requests;
 
 //What is the mem stuff in addIntoCache ??
 
+// "reset" the struct when you replace item in cache
+
 //Is a FIFO apprach with 'start of list -> cyclic' appraoch effective?
 
+//yes this is a good approach
+
 //path is always local?
+
+//no, but we just psuedo-service non local requests
 
 /* ******************************************************************************/
 
