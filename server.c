@@ -53,6 +53,16 @@ typedef struct cache_entry {
 cache_entry_t *cache;
 request_t *requests;
 
+/* ******************************* Questions ************************************/
+
+//What is the mem stuff in addIntoCache ??
+
+//Is a FIFO apprach with 'start of list -> cyclic' appraoch effective?
+
+//path is always local?
+
+/* ******************************************************************************/
+
 /* ************************ Dynamic Pool Code ***********************************/
 // Extra Credit: This function implements the policy to change the worker thread pool dynamically
 // depending on the number of requests
