@@ -35,7 +35,8 @@ int req_next_to_retrieve = -1;
 int cache_next_to_store = 0;
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t request_cv  = PTHREAD_COND_INITIALIZER;
+pthread_cond_t request_exists  = PTHREAD_COND_INITIALIZER;
+pthred_cond_t space_for_request = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cache_cv  = PTHREAD_COND_INITIALIZER;
 
 // structs:
@@ -90,12 +91,12 @@ int getCacheIndex(char *request){
 void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memeory when adding or replacing cache entries
-    
+
 }
 
 // clear the memory allocated to the cache
 void deleteCache(){
-    free(cache);
+  // De-allocate/free the cache memory
 }
 
 // Function to initialize the cache
@@ -111,7 +112,7 @@ int readFromDisk(/*necessary arguments*/) {
 
 void IncrementCacheNextToStore() {
     cache_next_to_store++;
-    
+
     if (cache_next_to_store == cache_entries) {
         cache_next_to_store = 0;
     }
@@ -124,21 +125,8 @@ void IncrementCacheNextToStore() {
 /* ************************************ Utilities ********************************/
 // Function to get the content type from the request
 char* getContentType(char * mybuf) {
-    int len = strlen(mybuf);
   // Should return the content type based on the file type in the request
   // (See Section 5 in Project description for more details)
-    if(mybuf[len-5]=='.' && mybuf[len-4]=='h' && mybuf[len-3]=='t'&& mybuf[len-2]=='m'&& mybuf[len-1]=='l'){
-        return "text/html";
-    }
-    else if(mybuf[len-5]=='.' && mybuf[len-4]=='j' && mybuf[len-3]=='p'&& mybuf[len-2]=='e'&& mybuf[len-1]=='g'){
-        return "image/jpeg";
-    }
-    else if(mybuf[len-4]=='.' && mybuf[len-3]=='g' && mybuf[len-2]=='i'&& mybuf[len-1]=='f'){
-        return "image/gif";
-    }
-    else{
-        return "text/plain";
-    }
 }
 
 // This function returns the current time in milliseconds
@@ -154,13 +142,20 @@ int getCurrentTimeInMills() {
 void * dispatch(void *arg) {
 
   while (1) {
-
+      pthread_mutex_lock(&lock);
     // Accept client connection
-
+      int fd = accept_connection():
     // Get request from the client
-
+      char filename[1024];
+      get_request(fd, filename);
     // Add the request into the queue
-
+      struct request_t request = {fd, filename};
+      while(req_next_to_store == req_next_to_retrieve){
+          pthread_cond_wait(&lock, &space_for_request);
+      }
+      requests[req_next_to_store] = request;
+      pthread_cond_signal(&request_exists);
+      pthread_mutex_unlock(&lock);
    }
    return NULL;
 }
@@ -170,17 +165,48 @@ void * dispatch(void *arg) {
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
   int start, stop, elapsed;
-  request_t current;
+  int cache_idx;
+  cache_entry_t current_entry;
+  request_t current_req;
 
   while (1) {
+    pthread_mutex_lock(&lock);
+
+    // wait until request queue is not empty
+    while (req_next_to_store == (req_next_to_retrieve + 1)) {
+      pthread_cond_wait(&request_exists, &lock);
+    }
+
     // Start recording time
     start = getCurrentTimeInMills();
 
     // Get the request from the queue
+    current_req = requests[req_next_to_retrieve];
+    // update index tracker for queue
+    if(req_next_to_retrieve == (qlen-1)) {
+      req_next_to_retrieve = 0;
+    } else {
+      req_next_to_retrieve++;
+    }
 
+    pthread_mutex_unlock(&lock);
 
-    // Get the data from the disk or the cache
-    (getCacheIndex(&current) != -1)
+    // a request has been handled so signal to a
+    // dispatcher to handle a new one
+    pthread_cond_signal(&space_for_request);
+
+    // reacquire lock to begin working on cache
+    pthread_mutex_lock(&lock);
+
+    // TODO Get the data from the disk or the cache
+    cache_idx = getCacheIndex(current_req.request);
+    if (cache_idx != -1) {
+      // req is in cache
+      current_entry = cache[cache_idx];
+    } else {
+      // req is not in cache
+
+    }
 
     // Stop recording the time
     stop = getCurrentTimeInMills();
@@ -188,9 +214,11 @@ void * worker(void *arg) {
 
 
     // Log the request into the file and terminal
-    printf();
+
 
     // return the result
+
+    pthread_mutex_unlock(&lock);
   }
   return NULL;
 }
@@ -201,51 +229,41 @@ int main(int argc, char **argv) {
 
   // Error check on number of arguments
   // Decided to check if caching is enabled [argc == 8 -> Caching enabled]
-  if(argc != 7 && argc != 8){
+  if(argc != 8){
     printf("usage: %s port path num_dispatcher num_workers dynamic_flag queue_length cache_size\n", argv[0]);
     return -1;
   }
 
-  // Get the input args
-    if(argc==7){
-        port = atoi(argv[1]);
-        path = argv[2];
-        num_dispatcher=atoi(argv[3]);
-        num_workers=atoi(argv[4]);
-        dynamic_flag = 0;
-        qlen = atoi(argv[5]);
-        cache_entries=atoi(argv[6]);
-    }
-    else if(argc==8){
-        port = atoi(argv[1]);
-        path = argv[2];
-        num_dispatcher=atoi(argv[3]);
-        num_workers=atoi(argv[4]);
-        dynamic_flag = atoi(argv[5]);
-        qlen = atoi(argv[6]);
-        cache_entries=atoi(argv[7]);
-    }
+  // get the input arguments
+  port = atoi(argv[1]);
+  path = argv[2];
+  num_dispatcher=atoi(argv[3]);
+  num_workers=atoi(argv[4]);
+  dynamic_flag = atoi(argv[5]);
+  qlen = atoi(argv[6]);
+  cache_entries=atoi(argv[7]);
+
   // Perform error checks on the input arguments
-    if(port < 1025 || port > 65535){
-        printf("port #%d is invalid.\n", port);
-        return -1;
-    }
-    if(num_workers > MAX_THREADS || num_workers <= 0){
-        printf("num_workers #%d is invalid.\n", num_workers);
-        return -1;
-    }
-    if(num_dispatcher > MAX_THREADS || num_workers <= 0){
-        printf("num_dispatchers #%d is invalid.\n", num_dispatcher);
-        return -1;
-    }
-    if(qlen > MAX_queue_len || qlen <= 0){
-        printf("queue length #%d is invalid.\n", qlen);
-        return -1;
-    }
-    if(cache_entries > MAX_CE || cache_entries <= 0){
-        printf("cache entries #%d is invalid.\n", cache_entries);
-        return -1;
-    }
+  if(port < 1025 || port > 65535){
+      printf("port #%d is invalid.\n", port);
+      return -1;
+  }
+  if(num_workers > MAX_THREADS || num_workers <= 0){
+      printf("num_workers #%d is invalid.\n", num_workers);
+      return -1;
+  }
+  if(num_dispatcher > MAX_THREADS || num_workers <= 0){
+      printf("num_dispatchers #%d is invalid.\n", num_dispatcher);
+      return -1;
+  }
+  if(qlen > MAX_queue_len || qlen <= 0){
+      printf("queue length #%d is invalid.\n", qlen);
+      return -1;
+  }
+  if(cache_entries > MAX_CE || cache_entries <= 0){
+      printf("cache entries #%d is invalid.\n", cache_entries);
+      return -1;
+  }
   // Change the current working directory to server root directory
   chdir(path);
 
@@ -257,10 +275,6 @@ int main(int argc, char **argv) {
   pthread_t workers[num_workers];
 
   // Clean up
-<<<<<<< HEAD
-
-=======
-    deleteCache();
->>>>>>> 8b4aef9e04ecef7803f2e5d0b4afc97968709946
+  deleteCache();
   return 0;
 }
