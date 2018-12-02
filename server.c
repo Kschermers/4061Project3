@@ -152,6 +152,7 @@ void initCache(){
 // Add necessary arguments as needed
 int readFromDisk(char *path) {
   FILE *file = fopen(path);
+  
 }
 
 void IncrementCacheNextToStore() {
