@@ -110,7 +110,7 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
     pthread_mutex_lock(&lock);
 
     cache_entry_t toFree = cache[cache_next_to_store];
-    
+
     if (toFree.flag == 1) {
         free(toFree.request);
         free(toFree.content);
@@ -150,8 +150,8 @@ void initCache(){
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
-int readFromDisk(/*necessary arguments*/) {
-  // Open and read the contents of file given the request
+int readFromDisk(char *path) {
+  FILE *file = fopen(path);
 }
 
 void IncrementCacheNextToStore() {
