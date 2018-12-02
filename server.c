@@ -152,7 +152,7 @@ void initCache(){
 // Add necessary arguments as needed
 int readFromDisk(char *path) {
   FILE *file = fopen(path);
-  
+
 }
 
 void IncrementCacheNextToStore() {
@@ -227,6 +227,11 @@ void * worker(void *arg) {
   cache_entry_t current_entry;
   request_t current_req;
 
+  // temp variables for logging
+  int thread_id = (int) *arg;
+  int num_req = 0;
+  char* cache_hit_miss = NULL;
+
   while (1) {
     pthread_mutex_lock(&lock);
 
@@ -260,6 +265,7 @@ void * worker(void *arg) {
     cache_idx = getCacheIndex(current_req.request);
     if (cache_idx != -1) {
       // req is in cache
+      cache_hit_miss = "HIT";
       current_entry = cache[cache_idx];
     } else {
       // req is not in cache
