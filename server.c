@@ -228,6 +228,7 @@ void * worker(void *arg) {
   request_t current_req;
 
   // temp variables for logging
+  char* log_str = NULL;
   int thread_id = (int) *arg;
   int num_req = 0;
   char* cache_hit_miss = NULL;
@@ -269,9 +270,11 @@ void * worker(void *arg) {
       current_entry = cache[cache_idx];
     } else {
       // req is not in cache
-        readFromDisk(current_req.request);
-        addIntoCache();
+      cache_hit_miss = "MISS";
+      readFromDisk(current_req.request);
+      addIntoCache();
 
+      current_entry = cache[cache_next_to_store-1];
     }
 
     // Stop recording the time
@@ -279,17 +282,17 @@ void * worker(void *arg) {
     elapsed = stop - start;
 
 
-    // Log the request into the file and terminal
-
     pthread_mutex_unlock(&lock);
 
     // return the result
     if () {
-      return_result();
+      return_result(current_req.fd, getContentType(), );
     } else {
       return_error();
     }
 
+    // Log the request into the file and terminal
+    log_str = "[" ^ thread_id ^ "]" ^ "[" ^  ^ "]"
 
   }
   return NULL;
