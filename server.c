@@ -239,7 +239,7 @@ void * worker(void *arg) {
     // reacquire lock to begin working on cache
     pthread_mutex_lock(&lock);
 
-    // TODO Get the data from the disk or the cache
+    // Get the data from the disk or the cache
     cache_idx = getCacheIndex(current_req.request);
     if (cache_idx != -1) {
       // req is in cache
@@ -321,30 +321,31 @@ int main(int argc, char **argv) {
   pthread_t dispatchers[num_dispatch];
   pthread_t workers[num_workers];
   tids[num_workers + num_dispatch];
-    
-    for (int i = 0; i < num_workers; i++) {
-        tids[i] = i;
-        pthread_create(&workers[i], NULL, worker, &tids[i]);
-    }
-    int j = i;
-    for(; i < num_dispatch + j; i++) {
-        tids[i] = i;
-        pthread_create(&dispatchers[i-j], NULL, dispatch, &tids[i]);
-    }
-    
-    for (int i = 0; i < num_workers; i++) {
-        pthread_join(&workers[i], NULL);
-    }
-    int j = i;
-    for(; i < num_dispatch + j; i++) {
-        pthread_join(&dispatchers[i-j], NULL);
-    }
+
+  for (int i = 0; i < num_workers; i++) {
+      tids[i] = i;
+      pthread_create(&workers[i], NULL, worker, &tids[i]);
+  }
+  
+  int j = i;
+  for(; i < num_dispatch + j; i++) {
+      tids[i] = i;
+      pthread_create(&dispatchers[i-j], NULL, dispatch, &tids[i]);
+  }
+
+  for (int i = 0; i < num_workers; i++) {
+      pthread_join(&workers[i], NULL);
+  }
+  int j = i;
+  for(; i < num_dispatch + j; i++) {
+      pthread_join(&dispatchers[i-j], NULL);
+  }
 
   // Clean up
-    pthread_mutex_destroy(&lock);
-    pthread_cond_destroy(&request_exists);
-    pthread_cond_destroy(&space_for_request);
-    pthread_cond_destroy(&cache_cv);
+  pthread_mutex_destroy(&lock);
+  pthread_cond_destroy(&request_exists);
+  pthread_cond_destroy(&space_for_request);
+  pthread_cond_destroy(&cache_cv);
   deleteCache();
   return 0;
 }
