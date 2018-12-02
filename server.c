@@ -222,11 +222,11 @@ void * worker(void *arg) {
   request_t current_req;
 
   // temp variables for logging
-  char log_str[1024];
+  char log_str[128];
   int thread_id = (int) *arg;
   int req_num = 0;
+  char bytes_error[64];
   char cache_hit_miss[4];
-  char* 
 
   while (1) {
     pthread_mutex_lock(&lock);
@@ -265,7 +265,7 @@ void * worker(void *arg) {
       cache_hit_miss = "HIT";
       current_entry = cache[cache_idx];
     } else {
-      // req is not in cache
+      // TODO req is not in cache
       cache_hit_miss = "MISS";
       readFromDisk(current_req.request);
       addIntoCache();
@@ -280,18 +280,17 @@ void * worker(void *arg) {
 
 
 
-    // return the result
+    // TODO return the result
     if () {
       return_result(current_req.fd, getContentType(), );
     } else {
       return_error();
     }
 
-    // Log the request into the file and terminal
+    // TODO Log the request into the file and terminal
     snprintf(log_str, "[%d][%d][%d][%s][][%dms][%s]",
              thread_id, req_num, current_req.fd, current_req.request,
              , elapsed, cache_hit_miss)
-    log_str = "[" ^ thread_id ^ "]" ^ "[" ^  ^ "]"
 
 
     pthread_mutex_unlock(&lock);
