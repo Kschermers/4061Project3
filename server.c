@@ -319,10 +319,22 @@ int main(int argc, char **argv) {
     int j = i;
     for(; i < num_dispatch + j; i++) {
         tids[i] = i;
-        pthread_create(&dispatchers[i], NULL, dispatch, &tids[i]);
+        pthread_create(&dispatchers[i-j], NULL, dispatch, &tids[i]);
+    }
+    
+    for (int i = 0; i < num_workers; i++) {
+        pthread_join(&workers[i], NULL);
+    }
+    int j = i;
+    for(; i < num_dispatch + j; i++) {
+        pthread_join(&dispatchers[i-j], NULL);
     }
 
   // Clean up
+    pthread_mutex_destroy(&lock);
+    pthread_cond_destroy(&request_exists);
+    pthread_cond_destroy(&space_for_request);
+    pthread_cond_destroy(&cache_cv);
   deleteCache();
   return 0;
 }
