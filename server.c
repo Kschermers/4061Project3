@@ -66,17 +66,11 @@ request_t *requests;
 
 /* ******************************* Questions ************************************/
 
-//What is the mem stuff in addIntoCache ??
+//TODO: understand content versus request
 
-// "reset" the struct when you replace item in cache
+//TODO: complete readFromDisk()
 
-//Is a FIFO apprach with 'start of list -> cyclic' appraoch effective?
-
-//yes this is a good approach
-
-//path is always local?
-
-//no, but we just psuedo-service non local requests
+//TODO: other stuff
 
 /* ******************************************************************************/
 
