@@ -5,7 +5,7 @@
  *  Names: Nicole Walker, Samuel Ball, Kadin Schermers
  *  X500s: walk0760, ballx188, scher528
  */
- 
+
 
 #include <string.h>
 #include <stdlib.h>
@@ -230,10 +230,16 @@ void * worker(void *arg) {
 
     // Log the request into the file and terminal
 
+    pthread_mutex_unlock(&lock);
 
     // return the result
+    if () {
+      return_result();
+    } else {
+      return_error();
+    }
 
-    pthread_mutex_unlock(&lock);
+
   }
   return NULL;
 }
