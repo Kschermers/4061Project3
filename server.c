@@ -307,8 +307,17 @@ int main(int argc, char **argv) {
   // Create dispatcher and worker threads
   pthread_t dispatchers[num_dispatch];
   pthread_t workers[num_workers];
+  tids[num_workers + num_dispatch];
     
-  for (int )
+    for (int i = 0; i < num_workers; i++) {
+        tids[i] = i;
+        pthread_create(&workers[i], NULL, worker, &tids[i]);
+    }
+    
+    for(i = i; i < num_dispatch + i; i++) {
+        tids[i] = i;
+        pthread_create(&dispatchers[i], NULL, dispatch, &tids[i]);
+    }
 
   // Clean up
   deleteCache();
