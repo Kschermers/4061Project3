@@ -106,6 +106,9 @@ int getCacheIndex(char *request){
 void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memeory when adding or replacing cache entries
+    cache_entry_t toFree = cache[cache_next_to_store];
+    free(toFree.request);
+    free(toFree.content);
 
 }
 
