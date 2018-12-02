@@ -107,25 +107,29 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memeory when adding or replacing cache entries
     pthread_mutex_lock(&lock);
-    
+
     cache_entry_t toFree = cache[cache_next_to_store];
     free(toFree.request);
     free(toFree.content);
-    
+
     toFree.request = malloc(strlen(mybuf));
     toFree.request = mybuf;
     toFree.content = malloc(strlen(memory));
     toFree.content = memory;
     toFree.len = memory_size;
-    
+
     cache[cache_next_to_store] = toFree;
     IncrementCacheNextToStore();
-    
+
     pthread_mutex_unlock(&lock);
 }
 
 // clear the memory allocated to the cache
 void deleteCache(){
+    for (int i = 0; i < cache_entries; i++) {
+        free(cache[i].request);
+        free(cache[i].content);
+    }
     free(cache);
 }
 
@@ -328,7 +332,7 @@ int main(int argc, char **argv) {
       tids[i] = i;
       pthread_create(&workers[i], NULL, worker, &tids[i]);
   }
-  
+
   int j = i;
   for(; i < num_dispatch + j; i++) {
       tids[i] = i;
