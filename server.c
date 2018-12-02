@@ -313,8 +313,8 @@ int main(int argc, char **argv) {
         tids[i] = i;
         pthread_create(&workers[i], NULL, worker, &tids[i]);
     }
-    
-    for(i = i; i < num_dispatch + i; i++) {
+    int j = i;
+    for(; i < num_dispatch + j; i++) {
         tids[i] = i;
         pthread_create(&dispatchers[i], NULL, dispatch, &tids[i]);
     }
