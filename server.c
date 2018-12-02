@@ -269,6 +269,8 @@ void * worker(void *arg) {
       current_entry = cache[cache_idx];
     } else {
       // req is not in cache
+        readFromDisk(current_req.request);
+        addIntoCache();
 
     }
 
