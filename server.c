@@ -222,13 +222,15 @@ void * worker(void *arg) {
   request_t current_req;
 
   // temp variables for logging
-  char* log_str = NULL;
+  char log_str[1024];
   int thread_id = (int) *arg;
-  int num_req = 0;
-  char* cache_hit_miss = NULL;
+  int req_num = 0;
+  char cache_hit_miss[4];
+  char* 
 
   while (1) {
     pthread_mutex_lock(&lock);
+    req_num++;
 
     // wait until request queue is not empty
     while (req_next_to_store == (req_next_to_retrieve + 1)) {
@@ -276,7 +278,7 @@ void * worker(void *arg) {
     elapsed = stop - start;
 
 
-    pthread_mutex_unlock(&lock);
+
 
     // return the result
     if () {
@@ -286,8 +288,13 @@ void * worker(void *arg) {
     }
 
     // Log the request into the file and terminal
+    snprintf(log_str, "[%d][%d][%d][%s][][%dms][%s]",
+             thread_id, req_num, current_req.fd, current_req.request,
+             , elapsed, cache_hit_miss)
     log_str = "[" ^ thread_id ^ "]" ^ "[" ^  ^ "]"
 
+
+    pthread_mutex_unlock(&lock);
   }
   return NULL;
 }
