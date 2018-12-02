@@ -106,10 +106,20 @@ int getCacheIndex(char *request){
 void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memeory when adding or replacing cache entries
+    pthread_mutex_lock(&lock);
+    
     cache_entry_t toFree = cache[cache_next_to_store];
     free(toFree.request);
     free(toFree.content);
-
+    
+    toFree.request = &mybuf;
+    toFree.content = &memory;
+    toFree.len = memory_size;
+    
+    cache[cache_next_to_store] = toFree;
+    IncrementCacheNextToStore();
+    
+    pthread_mutex_unlock(&lock);
 }
 
 // clear the memory allocated to the cache
