@@ -55,6 +55,7 @@ typedef struct request_queue {
 } request_t;
 
 typedef struct cache_entry {
+    int flag;
     int len;
     char *request;
     char *content;
@@ -109,14 +110,17 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
     pthread_mutex_lock(&lock);
     
     cache_entry_t toFree = cache[cache_next_to_store];
-    free(toFree.request);
-    free(toFree.content);
+    if (toFree.flag == 1) {
+        free(toFree.request);
+        free(toFree.content);
+    }
     
     toFree.request = malloc(strlen(mybuf));
     toFree.request = mybuf;
     toFree.content = malloc(strlen(memory));
     toFree.content = memory;
     toFree.len = memory_size;
+    toFree.flag = 1;
     
     cache[cache_next_to_store] = toFree;
     IncrementCacheNextToStore();
@@ -132,6 +136,10 @@ void deleteCache(){
 // Function to initialize the cache
 void initCache(){
     cache = (cache_entry_t *) malloc(sizeof(cache_entry_t) * cache_entries);
+    
+    for(int i = 0; i < cache_entries; i++) {
+        cache[i].flag = 0;
+    }
 }
 
 // Function to open and read the file from the disk into the memory
