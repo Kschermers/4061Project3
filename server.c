@@ -112,7 +112,7 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
 
      if (toFree.flag == 1) {
          free(toFree.request);
-         free(toFree.content);
+          free(toFree.content);
      }
 
      toFree.request = malloc(strlen(mybuf));
