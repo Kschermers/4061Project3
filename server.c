@@ -149,17 +149,19 @@ void initCache(){
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
-int readFromDisk(char *path) {
+char* readFromDisk(char *path) {
      stat filestats;
      FILE *file = fopen(path);
      if (fstat(file,stat) < 0) {
          printf("File at %s was unable to be read\n",path);
-         return -1;
+         return '\0';
      } else {
+         //man fstat to understand what this is doing
          int bytes = filestats.off_t;
-         //read into char *
-         //idk how we want to handle this in terms of passing around the content once we read it
-      return 0;
+         
+         char *fileContent = malloc(bytes);
+         read(file,fileContent,bytes);
+      return fileContent;
      }
 }
 
@@ -283,8 +285,11 @@ void * worker(void *arg) {
      } else {
     // TODO req is not in cache
     cache_hit_miss = "MISS";
-    readFromDisk(current_req.request);
-    addIntoCache();
+         
+    char* content = readFromDisk(current_req.request);
+    int contentBytes = strlen(content);
+    
+    addIntoCache(current_req.request,content,contentBytes);
 
     current_entry = cache[cache_next_to_store-1];
      }
