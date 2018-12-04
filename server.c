@@ -32,7 +32,7 @@
 */
 int port;
 char* path;
-int num_dispatcher;
+int num_dispatch;
 int num_workers;
 int dynamic_flag;
 int qlen;
@@ -280,11 +280,11 @@ void * worker(void *arg) {
      cache_idx = getCacheIndex(current_req.request);
      if (cache_idx != -1) {
     // req is in cache
-    cache_hit_miss = "HIT";
+    //cache_hit_miss = "HIT"; not assignable
     current_entry = cache[cache_idx];
      } else {
     // TODO req is not in cache
-    cache_hit_miss = "MISS";
+    //cache_hit_miss = "MISS"; not assignable
          
     char* content = readFromDisk(current_req.request);
     int contentBytes = strlen(content);
@@ -302,11 +302,11 @@ void * worker(void *arg) {
 
 
      // TODO return the result
-     if () {
+    /* if () {
     return_result(current_req.fd, getContentType(), );
      } else {
     return_error();
-     }
+     }*/
 
      // TODO Log the request into the file and terminal
      snprintf(log_str, "[%d][%d][%d][%s][][%dms][%s]",
