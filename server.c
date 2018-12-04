@@ -214,7 +214,7 @@ void * dispatch(void *arg) {
   while (1) {
     pthread_mutex_lock(&lock);
      // Accept client connection
-    int fd = accept_connection():
+      int fd = accept_connection();
      // Get request from the client
     char filename[1024];
     get_request(fd, filename);
@@ -333,7 +333,7 @@ int main(int argc, char **argv) {
   // get the input arguments
   port = atoi(argv[1]);
   path = argv[2];
-  num_dispatcher=atoi(argv[3]);
+  num_dispatch=atoi(argv[3]);
   num_workers=atoi(argv[4]);
   dynamic_flag = atoi(argv[5]);
   qlen = atoi(argv[6]);
@@ -348,8 +348,8 @@ int main(int argc, char **argv) {
     printf("num_workers #%d is invalid.\n", num_workers);
     return -1;
   }
-  if(num_dispatcher > MAX_THREADS || num_workers <= 0){
-    printf("num_dispatchers #%d is invalid.\n", num_dispatcher);
+  if(num_dispatch > MAX_THREADS || num_workers <= 0){
+    printf("num_dispatchers #%d is invalid.\n", num_dispatch);
     return -1;
   }
   if(qlen > MAX_queue_len || qlen <= 0){
@@ -369,9 +369,10 @@ int main(int argc, char **argv) {
   // Create dispatcher and worker threads
   pthread_t dispatchers[num_dispatch];
   pthread_t workers[num_workers];
-  tids[num_workers + num_dispatch];
+  int tids[num_workers + num_dispatch];
 
-  for (int i = 0; i < num_workers; i++) {
+  int i;
+  for (i = 0; i < num_workers; i++) {
     tids[i] = i;
     pthread_create(&workers[i], NULL, worker, &tids[i]);
   }
@@ -381,11 +382,11 @@ int main(int argc, char **argv) {
     tids[i] = i;
     pthread_create(&dispatchers[i-j], NULL, dispatch, &tids[i]);
   }
-
-  for (int i = 0; i < num_workers; i++) {
+  
+  for (i = 0; i < num_workers; i++) {
     pthread_join(&workers[i], NULL);
   }
-  int j = i;
+  j = i;
   for(; i < num_dispatch + j; i++) {
     pthread_join(&dispatchers[i-j], NULL);
   }
