@@ -17,6 +17,7 @@
 #include <sys/time.h>
 #include <fcntl.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <time.h>
 #include "util.h"
 #include <stdbool.h>
@@ -45,7 +46,7 @@ int cache_next_to_store = 0;
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t request_exists  = PTHREAD_COND_INITIALIZER;
-pthred_cond_t space_for_request = PTHREAD_COND_INITIALIZER;
+pthread_cond_t space_for_request = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cache_cv  = PTHREAD_COND_INITIALIZER;
 
 // structs:
@@ -102,6 +103,14 @@ int getCacheIndex(char *request){
      return -1;
 }
 
+void IncrementCacheCounter() {
+    cache_next_to_store++;
+    
+    if (cache_next_to_store == cache_entries) {
+        cache_next_to_store = 0;
+    }
+}
+
 // Function to add the request and its file content into the cache
 void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
@@ -124,7 +133,7 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
      toFree.flag = 1;
 
      cache[cache_next_to_store] = toFree;
-     IncrementCacheNextToStore();
+     IncrementCacheCounter();
 
      pthread_mutex_unlock(&lock);
 }
@@ -150,32 +159,20 @@ void initCache(){
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
 char* readFromDisk(char *path) {
-     stat filestats;
-     FILE *file = fopen(path);
+     struct stat filestats;
+     FILE *file = fopen(path,"``r''");
      if (fstat(file,stat) < 0) {
          printf("File at %s was unable to be read\n",path);
          return '\0';
      } else {
          //man fstat to understand what this is doing
-         int bytes = filestats.off_t;
+         int bytes = filestats.st_size;
          
          char *fileContent = malloc(bytes);
          read(file,fileContent,bytes);
       return fileContent;
      }
 }
-
-}
-
-void IncrementCacheNextToStore() {
-    cache_next_to_store++;
-
-    if (cache_next_to_store == cache_entries) {
-        cache_next_to_store = 0;
-     }
-}
-
-
 
 /**********************************************************************************/
 
@@ -219,7 +216,7 @@ void * dispatch(void *arg) {
     char filename[1024];
     get_request(fd, filename);
      // Add the request into the queue
-    struct request_t request = {fd, filename};
+    request_t request = {fd, filename};
     while(req_next_to_store == req_next_to_retrieve){
           pthread_cond_wait(&lock, &space_for_request);
     }
@@ -241,7 +238,7 @@ void * worker(void *arg) {
 
   // temp variables for logging
   char log_str[128];
-  int thread_id = (int) *arg;
+  int thread_id = (int) arg;
   int req_num = 0;
   char bytes_error[64];
   char cache_hit_miss[4];
@@ -310,8 +307,8 @@ void * worker(void *arg) {
 
      // TODO Log the request into the file and terminal
      snprintf(log_str, "[%d][%d][%d][%s][][%dms][%s]",
-           thread_id, req_num, current_req.fd, current_req.request,
-           , elapsed, cache_hit_miss)
+           thread_id, req_num, current_req.fd,
+           current_req.request, elapsed, cache_hit_miss);
 
 
      pthread_mutex_unlock(&lock);
