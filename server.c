@@ -160,10 +160,11 @@ void initCache(){
 // Add necessary arguments as needed
 char* readFromDisk(char *path) {
      struct stat filestats;
-     FILE *file = fopen(path,"``r''");
-     if (fstat(file,stat) < 0) {
+     FILE *file = fopen(path,"r");
+    int fd = fileno(file);
+     if (fstat(fd,stat) < 0) {
          printf("File at %s was unable to be read\n",path);
-         return '\0';
+         return NULL;
      } else {
          //man fstat to understand what this is doing
          int bytes = filestats.st_size;
