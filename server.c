@@ -173,7 +173,7 @@ char* readFromDisk(char *path) {
          //man fstat to understand what this is doing
          int bytes = filestats.st_size;
 
-         char *fileContent = malloc(bytes);
+         char *fileContent = (char *)malloc(bytes);
          read(fd,fileContent,bytes);
       return fileContent;
      }
