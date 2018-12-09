@@ -105,7 +105,7 @@ int getCacheIndex(char *request){
 
 void IncrementCacheCounter() {
     cache_next_to_store++;
-    
+
     if (cache_next_to_store == cache_entries) {
         cache_next_to_store = 0;
     }
@@ -167,7 +167,7 @@ char* readFromDisk(char *path) {
      } else {
          //man fstat to understand what this is doing
          int bytes = filestats.st_size;
-         
+
          char *fileContent = malloc(bytes);
          read(file,fileContent,bytes);
       return fileContent;
@@ -244,74 +244,74 @@ void * worker(void *arg) {
   char cache_hit_miss[4];
 
   while (1) {
-     pthread_mutex_lock(&lock);
-     req_num++;
+    pthread_mutex_lock(&lock);
+    req_num++;
 
-     // wait until request queue is not empty
-     while (req_next_to_store == (req_next_to_retrieve + 1)) {
-    pthread_cond_wait(&request_exists, &lock);
-     }
+    // wait until request queue is not empty
+    while (req_next_to_store == (req_next_to_retrieve + 1)) {
+      pthread_cond_wait(&request_exists, &lock);
+    }
 
-     // Start recording time
-     start = getCurrentTimeInMills();
+    // Start recording time
+    start = getCurrentTimeInMills();
 
-     // Get the request from the queue
-     current_req = requests[req_next_to_retrieve];
-     // update index tracker for queue
-     if(req_next_to_retrieve == (qlen-1)) {
-    req_next_to_retrieve = 0;
-     } else {
-    req_next_to_retrieve++;
-     }
+    // Get the request from the queue
+    current_req = requests[req_next_to_retrieve];
+    // update index tracker for queue
+    if(req_next_to_retrieve == (qlen-1)) {
+      req_next_to_retrieve = 0;
+    } else {
+      req_next_to_retrieve++;
+    }
 
-     pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&lock);
 
-     // a request has been handled so signal to a
-     // dispatcher to handle a new one
-     pthread_cond_signal(&space_for_request);
+    // a request has been handled so signal to a
+    // dispatcher to handle a new one
+    pthread_cond_signal(&space_for_request);
 
-     // reacquire lock to begin working on cache
-     pthread_mutex_lock(&lock);
+    // reacquire lock to begin working on cache
+    pthread_mutex_lock(&lock);
 
-     // Get the data from the disk or the cache
-     cache_idx = getCacheIndex(current_req.request);
-     if (cache_idx != -1) {
+    // Get the data from the disk or the cache
+    cache_idx = getCacheIndex(current_req.request);
+    if (cache_idx != -1) {
     // req is in cache
-    //cache_hit_miss = "HIT"; not assignable
+    cache_hit_miss = "HIT";
     current_entry = cache[cache_idx];
-     } else {
+    } else {
     // TODO req is not in cache
-    //cache_hit_miss = "MISS"; not assignable
-         
+    cache_hit_miss = "MISS";
+
     char* content = readFromDisk(current_req.request);
     int contentBytes = strlen(content);
-    
+
     addIntoCache(current_req.request,content,contentBytes);
 
     current_entry = cache[cache_next_to_store-1];
-     }
+    }
 
-     // Stop recording the time
-     stop = getCurrentTimeInMills();
-     elapsed = stop - start;
-
-
+    // Stop recording the time
+    stop = getCurrentTimeInMills();
+    elapsed = stop - start;
 
 
-     // TODO return the result
+
+
+    // TODO return the result
     /* if () {
-    return_result(current_req.fd, getContentType(), );
-     } else {
-    return_error();
-     }*/
+      return_result(current_req.fd, getContentType(), );
+    } else {
+      return_error();
+    }*/
 
-     // TODO Log the request into the file and terminal
-     snprintf(log_str, "[%d][%d][%d][%s][][%dms][%s]",
-           thread_id, req_num, current_req.fd,
-           current_req.request, elapsed, cache_hit_miss);
+    // TODO Log the request into the file and terminal
+    snprintf(log_str, "[%d][%d][%d][%s][][%dms][%s]",
+             thread_id, req_num, current_req.fd,
+             current_req.request, elapsed, cache_hit_miss);
 
 
-     pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&lock);
   }
   return NULL;
 }
@@ -379,7 +379,7 @@ int main(int argc, char **argv) {
     tids[i] = i;
     pthread_create(&dispatchers[i-j], NULL, dispatch, &tids[i]);
   }
-  
+
   for (i = 0; i < num_workers; i++) {
     pthread_join(&workers[i], NULL);
   }
