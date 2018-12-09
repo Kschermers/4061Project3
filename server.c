@@ -299,17 +299,14 @@ void * worker(void *arg) {
 
 
     // TODO return the result
-    /* if () {
-      return_result(current_req.fd, getContentType(), );
-    } else {
-      return_error();
-    }*/
+      if (return_result(current_req.fd, getContentType(content),content,contentBytes) != 0) {
+          return_error(current_req.fd,content);
+      } 
 
     // TODO Log the request into the file and terminal
     snprintf(log_str, "[%d][%d][%d][%s][][%dms][%s]",
              thread_id, req_num, current_req.fd,
              current_req.request, elapsed, cache_hit_miss);
-
 
     pthread_mutex_unlock(&lock);
   }
