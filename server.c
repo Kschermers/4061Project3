@@ -21,6 +21,7 @@
 #include <time.h>
 #include "util.h"
 #include <stdbool.h>
+#include <unistd.h>
 
 #define MAX_THREADS 100
 #define MAX_queue_len 100
