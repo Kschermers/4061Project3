@@ -247,7 +247,7 @@ void * worker(void *arg) {
   char bytes_error[256];
   char cache_hit_miss[5];
   char* content;
-  int contentBytes
+    int contentBytes;
 
   while (1) {
     pthread_mutex_lock(&lock);
