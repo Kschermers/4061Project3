@@ -222,7 +222,7 @@ void * dispatch(void *arg) {
      // Add the request into the queue
     request_t request = {fd, filename};
     while(req_next_to_store == req_next_to_retrieve){
-          pthread_cond_wait(&space_for_request, &lock);
+          pthread_cond_wait(&lock, &space_for_request);
     }
     requests[req_next_to_store] = request;
     pthread_cond_signal(&request_exists);
@@ -245,7 +245,7 @@ void * worker(void *arg) {
   int thread_id = *(int *) arg;
   int req_num = 0;
   char bytes_error[256];
-  char cache_hit_miss[5];
+  char cache_hit_miss[4];
 
   while (1) {
     pthread_mutex_lock(&lock);
@@ -281,11 +281,11 @@ void * worker(void *arg) {
     cache_idx = getCacheIndex(current_req.request);
     if (cache_idx != -1) {
       // Req is in cache
-      snprintf(cache_hit_miss, 4, "HIT");
+      snprintf(cache_hit_miss, 3, "HIT");
       current_entry = cache[cache_idx];
     } else {
       // Req is not in cache
-      snprintf(cache_hit_miss, 5, "MISS");
+      snprintf(cache_hit_miss, 4, "MISS");
 
       char* content = readFromDisk(current_req.request);
       int contentBytes = strlen(content);
@@ -323,7 +323,7 @@ void * worker(void *arg) {
     write(log_fd, log_str, log_len);
 
     // Log to terminal
-    write(1, log_str, log_len);
+    write(1, log_Str, log_len);
 
     pthread_mutex_unlock(&lock);
     req_num++;
@@ -396,11 +396,11 @@ int main(int argc, char **argv) {
   }
 
   for (i = 0; i < num_workers; i++) {
-    pthread_join(workers[i], NULL);
+    pthread_join(&workers[i], NULL);
   }
   j = i;
   for(; i < num_dispatch + j; i++) {
-    pthread_join(dispatchers[i-j], NULL);
+    pthread_join(&dispatchers[i-j], NULL);
   }
 
   // Clean up
