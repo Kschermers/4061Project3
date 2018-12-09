@@ -402,12 +402,12 @@ int main(int argc, char **argv) {
     pthread_create(&dispatchers[i-j], NULL, dispatch, &tids[i]);
   }
 
-  for (i = 0; i < num_workers; i++) {
-    pthread_join(workers[i], NULL);
+  for (i = 0; i < num_dispatch; i++) {
+    pthread_join(dispatchers[i], NULL);
   }
   j = i;
-  for(; i < num_dispatch + j; i++) {
-    pthread_join(dispatchers[i-j], NULL);
+  for(; i < num_workers + j; i++) {
+    pthread_join(workers[i-j], NULL);
   }
 
   // Clean up
