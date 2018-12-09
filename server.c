@@ -165,7 +165,7 @@ char* readFromDisk(char *path) {
      struct stat filestats;
      FILE *file = fopen(path,"r");
     int fd = fileno(file);
-     if (fstat(fd,filestats) < 0) {
+     if (fstat(fd,&filestats) < 0) {
          printf("File at %s was unable to be read\n",path);
          return NULL;
      } else {
