@@ -219,7 +219,7 @@ void * dispatch(void *arg) {
       int tid = *(int *) arg;
       printf("attempting connectoin in dispatcher %d\n",tid);
       int fd = accept_connection();
-      printf("connection success in dispatcher %d\n",tid)
+      printf("connection success in dispatcher %d\n",tid);
      // Get request from the client
     char filename[1024];
     get_request(fd, filename);
