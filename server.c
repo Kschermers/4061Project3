@@ -316,7 +316,8 @@ void * worker(void *arg) {
     // TODO finish logging
     // Log to file
     FILE* log_file = fopen("webserver_log.txt", "w");
-    write(, log_str, log_len);
+    int log_fd = fileno(log_file);
+    write(log_fd, log_str, log_len);
 
     // Log to terminal
     write(1, log_Str, log_len);
