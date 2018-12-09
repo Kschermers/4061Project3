@@ -246,6 +246,8 @@ void * worker(void *arg) {
   int req_num = 0;
   char bytes_error[256];
   char cache_hit_miss[5];
+  char* content;
+  int contentBytes
 
   while (1) {
     pthread_mutex_lock(&lock);
@@ -287,8 +289,8 @@ void * worker(void *arg) {
       // Req is not in cache
       snprintf(cache_hit_miss, 5, "MISS");
 
-      char* content = readFromDisk(current_req.request);
-      int contentBytes = strlen(content);
+      content = readFromDisk(current_req.request);
+      contentBytes = strlen(content);
 
       addIntoCache(current_req.request,content,contentBytes);
 
@@ -302,7 +304,8 @@ void * worker(void *arg) {
 
 
     // Return the result or set the error
-    if (return_result(current_req.fd, getContentType(content), content, contentBytes) != 0) {
+      char * cType = getContentType(content);
+    if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
       return_error(current_req.fd, bytes_error);
     } else {
       sprintf(bytes_error, "%d", contentBytes);
