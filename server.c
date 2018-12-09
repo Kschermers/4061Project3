@@ -308,10 +308,11 @@ void * worker(void *arg) {
     // TODO Log the request into the file and terminal
     snprintf(log_str, "[%d][%d][%d][%s][][%dms][%s]",
              thread_id, req_num, current_req.fd,
-             current_req.request, elapsed, cache_hit_miss);
+             current_req.request, , elapsed, cache_hit_miss);
 
 
     pthread_mutex_unlock(&lock);
+    req_num++;
   }
   return NULL;
 }
