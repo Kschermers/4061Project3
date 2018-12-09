@@ -240,7 +240,7 @@ void * worker(void *arg) {
   char log_str[128];
   int thread_id = (int) arg;
   int req_num = 0;
-  char bytes_error[64];
+  char bytes_error[256];
   char cache_hit_miss[4];
 
   while (1) {
@@ -276,19 +276,19 @@ void * worker(void *arg) {
     // Get the data from the disk or the cache
     cache_idx = getCacheIndex(current_req.request);
     if (cache_idx != -1) {
-    // req is in cache
-    cache_hit_miss = "HIT";
-    current_entry = cache[cache_idx];
+      // req is in cache
+      cache_hit_miss = "HIT";
+      current_entry = cache[cache_idx];
     } else {
-    // TODO req is not in cache
-    cache_hit_miss = "MISS";
+      // TODO req is not in cache
+      cache_hit_miss = "MISS";
 
-    char* content = readFromDisk(current_req.request);
-    int contentBytes = strlen(content);
+      char* content = readFromDisk(current_req.request);
+      int contentBytes = strlen(content);
 
-    addIntoCache(current_req.request,content,contentBytes);
+      addIntoCache(current_req.request,content,contentBytes);
 
-    current_entry = cache[cache_next_to_store-1];
+      current_entry = cache[cache_next_to_store-1];
     }
 
     // Stop recording the time
@@ -297,16 +297,28 @@ void * worker(void *arg) {
 
 
 
+    // Return the result or set the error
+    if (return_result(current_req.fd, getContentType(content), content, contentBytes) != 0) {
+      return_error(current_req.fd, bytes_error);
+    } else {
+      sprintf(bytes_error, "%d", contentBytes);
+    }
 
-    // TODO return the result
-      if (return_result(current_req.fd, getContentType(content),content,contentBytes) != 0) {
-          return_error(current_req.fd,content);
-      }
+
 
     // TODO Log the request into the file and terminal
-    snprintf(log_str, "[%d][%d][%d][%s][][%dms][%s]",
+    snprintf(log_str, "[%d][%d][%d][%s][%s][%dms][%s]",
              thread_id, req_num, current_req.fd,
-             current_req.request, , elapsed, cache_hit_miss);
+             current_req.request, bytes_error, elapsed, cache_hit_miss);
+    int log_len = strlen(log_str);
+
+    // TODO finish logging
+    // Log to file
+    FILE* log_file = fopen("webserver_log.txt", "w");
+    write(, log_str, log_len);
+
+    // Log to terminal
+    write(1, log_Str, log_len);
 
     pthread_mutex_unlock(&lock);
     req_num++;
