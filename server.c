@@ -173,7 +173,7 @@ char* readFromDisk(char *path) {
          int bytes = filestats.st_size;
 
          char *fileContent = malloc(bytes);
-         read(file,fileContent,bytes);
+         read(fd,fileContent,bytes);
       return fileContent;
      }
 }
