@@ -197,11 +197,12 @@ char* getContentType(char * mybuf) {
       }
 }
 
-// This function returns the current time in milliseconds
-int getCurrentTimeInMills() {
-  struct timeval curr_time;
-  gettimeofday(&curr_time, NULL);
-  return curr_time.tv_usec;
+
+// This function returns the current time in microseconds
+long getCurrentTimeInMicro() {
+    struct timeval curr_time;
+    gettimeofday(&curr_time, NULL);
+    return curr_time.tv_sec * 1000000 + curr_time.tv_usec;
 }
 
 /**********************************************************************************/
@@ -254,7 +255,7 @@ void * worker(void *arg) {
     }
 
     // Start recording time
-    start = getCurrentTimeInMills();
+    start = getCurrentTimeInMicro();
 
     // Get the request from the queue
     current_req = requests[req_next_to_retrieve];
@@ -293,7 +294,7 @@ void * worker(void *arg) {
     }
 
     // Stop recording the time
-    stop = getCurrentTimeInMills();
+    stop = getCurrentTimeInMicro();
     elapsed = stop - start;
 
 
