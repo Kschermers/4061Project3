@@ -316,8 +316,8 @@ void * worker(void *arg) {
 
     // TODO Log the request into the file and terminal
     snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]",
-             thread_id, req_num, current_req.fd,
-             (char*) current_req.request, bytes_error, elapsed, cache_hit_miss);
+             thread_id, req_num, current_req.fd, (char*) current_req.request,
+             bytes_error, elapsed, cache_hit_miss);
     int log_len = strlen(log_str);
 
     // TODO finish logging
