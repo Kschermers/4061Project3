@@ -389,6 +389,7 @@ int main(int argc, char **argv) {
   chdir(path);
 
   // Start the server and initialize cache
+  init(port);
   initCache();
 
   // Create dispatcher and worker threads
