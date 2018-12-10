@@ -218,12 +218,12 @@ void * dispatch(void *arg) {
     // Accept client connection
     int tid = *(int *) arg;
 
-    printf("DEBUG: TID #%d Attempting Connection", tid);
+    printf("DEBUG: TID #%d Attempting Connection\n", tid);
     while (fd = accept_connection() != 0) {
       //block until we have a successful connection
       usleep(3000);
     }
-    printf("DEBUG: TID #%d Connection Success", tid);
+    printf("DEBUG: TID #%d Connection Success\n", tid);
 
 
     // Get request from the client
