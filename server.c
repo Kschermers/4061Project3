@@ -220,9 +220,12 @@ void * dispatch(void *arg) {
 
     printf("DEBUG: TID #%d Attempting Connection\n", tid);
     fd =  accept_connection();
-    while (fd != 0) {
+    while (1) {
       //block until we have a successful connection
-        fd =  accept_connection();
+      fd =  accept_connection();
+        if(fd==0){
+            break;
+        }
       usleep(3000);
     }
     printf("DEBUG: TID #%d Connection Success\n", tid);
