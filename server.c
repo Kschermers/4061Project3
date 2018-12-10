@@ -219,7 +219,8 @@ void * dispatch(void *arg) {
       int tid = *(int *) arg;
     
       while (accept_connection() < 0) {
-          //do nothing, block until we have a successful connection
+          //block until we have a successful connection
+          usleep(3000);
       }
       int fd = accept_connection();
      // Get request from the client
