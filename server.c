@@ -389,7 +389,7 @@ int main(int argc, char **argv) {
   pthread_t dispatchers[num_dispatch];
   pthread_t workers[num_workers];
   int tids[num_workers + num_dispatch];
-
+    
   int i;
   for (i = 0; i < num_workers; i++) {
     tids[i] = i;
