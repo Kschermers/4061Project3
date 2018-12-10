@@ -219,8 +219,10 @@ void * dispatch(void *arg) {
     int tid = *(int *) arg;
 
     printf("DEBUG: TID #%d Attempting Connection\n", tid);
-    while (fd = accept_connection() != 0) {
+    fd =  accept_connection();
+    while (fd != 0) {
       //block until we have a successful connection
+        fd =  accept_connection();
       usleep(3000);
     }
     printf("DEBUG: TID #%d Connection Success\n", tid);
