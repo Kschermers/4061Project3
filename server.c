@@ -212,24 +212,27 @@ int getCurrentTimeInMills() {
 
 // Function to receive the request from the client and add to the queue
 void * dispatch(void *arg) {
-
+  int fd;
   while (1) {
     pthread_mutex_lock(&lock);
-     // Accept client connection
-      int tid = *(int *) arg;
-    
-      while (accept_connection() < 0) {
-          //block until we have a successful connection
-          usleep(3000);
-      }
-      int fd = accept_connection();
-     // Get request from the client
+    // Accept client connection
+    int tid = *(int *) arg;
+
+    printf("DEBUG: TID #%d Attempting Connection", tid);
+    while (fd = accept_connection() != 0) {
+      //block until we have a successful connection
+      usleep(3000);
+    }
+    printf("DEBUG: TID #%d Connection Success", tid);
+
+
+    // Get request from the client
     char filename[1024];
     get_request(fd, filename);
-     // Add the request into the queue
+    // Add the request into the queue
     request_t request = {fd, filename};
     while(req_next_to_store == req_next_to_retrieve){
-          pthread_cond_wait(&space_for_request, &lock);
+      pthread_cond_wait(&space_for_request, &lock);
     }
     requests[req_next_to_store] = request;
     pthread_cond_signal(&request_exists);
@@ -392,7 +395,7 @@ int main(int argc, char **argv) {
   pthread_t dispatchers[num_dispatch];
   pthread_t workers[num_workers];
   int tids[num_workers + num_dispatch];
-    
+
   int i;
   for (i = 0; i < num_workers; i++) {
     tids[i] = i;
