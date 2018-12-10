@@ -173,7 +173,7 @@ char* readFromDisk(char *path) {
          //man fstat to understand what this is doing
          int bytes = filestats.st_size;
 
-         char *fileContent = malloc(bytes);
+         char *fileContent = (char *)malloc(bytes);
          read(fd,fileContent,bytes);
       return fileContent;
      }
@@ -216,6 +216,12 @@ void * dispatch(void *arg) {
   while (1) {
     pthread_mutex_lock(&lock);
      // Accept client connection
+      int tid = *(int *) arg;
+    
+      while (accept_connection() < 0) {
+          //block until we have a successful connection
+          usleep(3000);
+      }
       int fd = accept_connection();
      // Get request from the client
     char filename[1024];
@@ -247,7 +253,7 @@ void * worker(void *arg) {
   int req_num = 0;
   char bytes_error[256];
   char cache_hit_miss[5];
-  char* content;
+  char* content = NULL;
     int contentBytes;
 
   while (1) {
@@ -386,7 +392,7 @@ int main(int argc, char **argv) {
   pthread_t dispatchers[num_dispatch];
   pthread_t workers[num_workers];
   int tids[num_workers + num_dispatch];
-
+    
   int i;
   for (i = 0; i < num_workers; i++) {
     tids[i] = i;
@@ -399,12 +405,12 @@ int main(int argc, char **argv) {
     pthread_create(&dispatchers[i-j], NULL, dispatch, &tids[i]);
   }
 
-  for (i = 0; i < num_workers; i++) {
-    pthread_join(workers[i], NULL);
+  for (i = 0; i < num_dispatch; i++) {
+    pthread_join(dispatchers[i], NULL);
   }
   j = i;
-  for(; i < num_dispatch + j; i++) {
-    pthread_join(dispatchers[i-j], NULL);
+  for(; i < num_workers + j; i++) {
+    pthread_join(workers[i-j], NULL);
   }
 
   // Clean up
