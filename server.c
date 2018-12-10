@@ -217,9 +217,11 @@ void * dispatch(void *arg) {
     pthread_mutex_lock(&lock);
      // Accept client connection
       int tid = *(int *) arg;
-      printf("attempting connectoin in dispatcher %d\n",tid);
+    
+      while (accept_connection() < 0) {
+          //do nothing, block until we have a successful connection
+      }
       int fd = accept_connection();
-      printf("connection success in dispatcher %d\n",tid);
      // Get request from the client
     char filename[1024];
     get_request(fd, filename);
