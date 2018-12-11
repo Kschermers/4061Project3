@@ -228,10 +228,7 @@ void * dispatch(void *arg) {
     if (get_request(fd, filename) == 0) {
       printf("DEBUG: TID #%d get_request() succeeded\n", tid);
       // Add the request into the queue
-        request_t request;
-        request.fd = fd;
-        request.request = (char*) malloc(1024);
-        request.request = filename;
+      request_t request = {fd, filename};
 
       printf("DEBUG TID #%d created request_t", tid);
       while(req_next_to_store == req_next_to_retrieve){
