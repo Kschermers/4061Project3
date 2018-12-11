@@ -53,7 +53,7 @@ pthread_cond_t cache_cv  = PTHREAD_COND_INITIALIZER;
 // structs:
 typedef struct request_queue {
     int fd;
-    void *request;
+    char request[1024];
 } request_t;
 
 typedef struct cache_entry {
