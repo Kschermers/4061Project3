@@ -238,8 +238,8 @@ void * dispatch(void *arg) {
         requests[req_next_to_store].fd = fd;
         memset(requests[req_next_to_store].request,'\0',1024);
         strncpy(requests[req_next_to_store].request, filename, 1024);
-        req_next_to_store = (req_next_to_store + 1) % req_current_items;
         req_current_items++;
+        req_next_to_store = (req_next_to_store + 1) % req_current_items;
       printf("DEBUG: TID #%d successfully put request into queue\n", tid);
       pthread_cond_signal(&request_exists);
     } else {
