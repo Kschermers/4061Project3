@@ -328,6 +328,7 @@ void * worker(void *arg) {
       snprintf(cache_hit_miss, 5, "MISS");
            printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
       content = readFromDisk(current_req.request);
+        printf("DEBUG: WORKER TID #%d attempting to get %s from disk\n", thread_id, current_req.request);
           printf("DEBUG: WORKER TID #%d got request from disk\n", thread_id);
       contentBytes = strlen(content);
         printf("DEBUG: WORKER TID #%d trying to add into cache\n", thread_id);
