@@ -169,21 +169,22 @@ void initQueue(){
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
 char* readFromDisk(char *path) {
+  char cwd[1024];
+  if (getcwd(cwd, sizeof(cwd)) != NULL) {
+    printf("DEBUG: readFromDisk(): current working directory is %s\n", cwd);
+  }
   printf("DEBUG: readFromDisk(): stat struct being created...\n");
   struct stat filestats;
-  printf("DEBUG: readFromDisk(): filepath being opened...\n");
+  printf("DEBUG: readFromDisk(): file at path %s being opened...\n", path);
   FILE *file = fopen(path, "r");
-  printf("DEBUG: readFromDisk(): fd being created...\n");
-  int fd;
-  if(file){
-        fd = fileno(file);
-        printf("DEBUG: readFromDisk(): fileno was read...\n");
+  if (file == NULL) {
+    printf("DEBUG: readFromDisk(): file returned from fopen() is NULL\n", path);
+  } else {
+    printf("DEBUG: readFromDisk(): file opened at %s\n", path);
   }
-  else {
-      printf("DEBUG: readFromDisk(): file was null...\n");
-      return NULL;
-  }
-  if (fstat(fd,&filestats) < 0) {
+  int fd = fileno(file);
+  printf("DEBUG: readFromDisk(): fileno(file) returned %d\n", fd);
+  if (fstat(fd, &filestats) < 0) {
     printf("File at %s was unable to be read\n", path);
     return NULL;
   } else {
@@ -282,8 +283,7 @@ void * worker(void *arg) {
   int req_num = 0;
   char bytes_error[256];
   char cache_hit_miss[5];
-  //char* content = NULL;
-    char *content;
+  char *content;
   int contentBytes;
 
   while (1) {
@@ -324,16 +324,21 @@ void * worker(void *arg) {
       current_entry = cache[cache_idx];
     } else {
       // Req is not in cache
-        printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
+      printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
       snprintf(cache_hit_miss, 5, "MISS");
-           printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
-      content = readFromDisk(current_req.request);
-        printf("DEBUG: WORKER TID #%d attempting to get %s from disk\n", thread_id, current_req.request);
-          printf("DEBUG: WORKER TID #%d got request from disk\n", thread_id);
+      printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
+      char* full_path;
+      full_path = strcat(path, ((char *) current_req.request));
+      content = readFromDisk(full_path);
+      if (content == NULL) {
+        printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id, content);
+      } else {
+        printf("DEBUG: WORKER TID #%d: readFromDisk() returned some content\n", thread_id, content);
+      }
       contentBytes = strlen(content);
-        printf("DEBUG: WORKER TID #%d trying to add into cache\n", thread_id);
-      addIntoCache(current_req.request,content,contentBytes);
-         printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
+      printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
+      addIntoCache(current_req.request, content, contentBytes);
+      printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
 
       current_entry = cache[cache_next_to_store-1];
     }
@@ -417,11 +422,11 @@ int main(int argc, char **argv) {
     return -1;
   }
   // Change the current working directory to server root directory
-  chdir(path);
+  // chdir(path);
 
   // Start the server and initialize cache
   init(port);
-    initQueue();
+  initQueue();
   initCache();
 
   // Create dispatcher and worker threads
