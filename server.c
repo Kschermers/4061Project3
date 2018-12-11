@@ -240,14 +240,16 @@ void * dispatch(void *arg) {
         memset(requests[req_next_to_store].request,'\0',1024);
         strncpy(requests[req_next_to_store].request, filename, 1024);
         req_current_items++;
-        req_next_to_store = (req_next_to_store + 1) % req_current_items;
+        req_next_to_store = (req_next_to_store + 1) % qlen;
       printf("DEBUG: DISPATCH TID #%d successfully put request into queue\n", tid);
+        pthread_mutex_unlock(&queuelock);
       pthread_cond_broadcast(&request_exists);
+        
     } else {
       printf("DEBUG: DISPATCH TID #%d get_request() failed\n", tid);
     }
 
-    pthread_mutex_unlock(&queuelock);
+    
     }
     return NULL;
 }
@@ -288,7 +290,7 @@ void * worker(void *arg) {
     printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
     // update index tracker for queue
       req_current_items--;
-    req_next_to_retrieve = (req_next_to_retrieve + 1) % req_current_items;
+    req_next_to_retrieve = (req_next_to_retrieve + 1) % qlen;
     pthread_mutex_unlock(&queuelock);
       
     pthread_cond_broadcast(&space_for_request);
