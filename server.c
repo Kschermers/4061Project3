@@ -241,7 +241,7 @@ void * dispatch(void *arg) {
         req_current_items++;
         req_next_to_store = (req_next_to_store + 1) % req_current_items;
       printf("DEBUG: DISPATCH TID #%d successfully put request into queue\n", tid);
-      pthread_cond_signal(&request_exists);
+      pthread_cond_broadcast(&request_exists);
     } else {
       printf("DEBUG: DISPATCH TID #%d get_request() failed\n", tid);
     }
@@ -291,7 +291,7 @@ void * worker(void *arg) {
 
     // a request has been handled so signal to a
     // dispatcher to handle a new one
-    pthread_cond_signal(&space_for_request);
+    pthread_cond_broadcast(&space_for_request);
       
     // Get the data from the disk or the cache
     cache_idx = getCacheIndex(current_req.request);
