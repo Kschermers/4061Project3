@@ -229,19 +229,15 @@ void * dispatch(void *arg) {
 
     if (get_request(fd, filename) == 0) {
       printf("DEBUG: TID #%d get_request() succeeded\n", tid);
-      // Add the request into the queue
-    //  request_t request = {fd, filename};
-        //seg fault
-      printf("DEBUG TID #%d created request_t", tid);
       while(req_next_to_store == req_next_to_retrieve){
         printf("DEBUG: TID #%d waiting for space in request queue\n", tid);
         pthread_cond_wait(&space_for_request, &lock);
       }
-      printf("DEBUG: TID #%d putting request into queue", tid);
+      printf("DEBUG: TID #%d putting request into queue\n", tid);
         requests[req_next_to_store].fd = fd;
         memset(requests[req_next_to_store].request,'\0',1024);
         strncpy(requests[req_next_to_store].request, filename, 1024);
-      printf("DEBUG: TID #%d successfully put request into queue", tid);
+      printf("DEBUG: TID #%d successfully put request into queue\n", tid);
       pthread_cond_signal(&request_exists);
     } else {
       printf("DEBUG: TID #%d get_request() failed\n", tid);
@@ -293,7 +289,7 @@ void * worker(void *arg) {
     } else {
       req_next_to_retrieve++;
     }
-    printf("DEBUG: TID #%d got request out of queue", thread_id);
+    printf("DEBUG: TID #%d got request out of queue\n", thread_id);
 
     // a request has been handled so signal to a
     // dispatcher to handle a new one
