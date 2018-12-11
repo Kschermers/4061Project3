@@ -159,6 +159,9 @@ void initCache(){
     cache[i].flag = 0;
   }
 }
+void initQueue(){
+    requests = (request_t *) malloc(sizeof(request_t) * qlen);
+}
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
@@ -213,22 +216,21 @@ int getCurrentTimeInMills() {
 // Function to receive the request from the client and add to the queue
 void * dispatch(void *arg) {
   int fd;
+    char filename[1024];
+    memset(filename_buffer,'\0',1024);
   while (1) {
     pthread_mutex_lock(&lock);
     // Accept client connection
     int tid = *(int *) arg;
-
     printf("DEBUG: TID #%d Attempting Connection\n", tid);
     fd =  accept_connection();
-
-
     // Get request from the client
-    char filename[1024];
+    
 
     if (get_request(fd, filename) == 0) {
       printf("DEBUG: TID #%d get_request() succeeded\n", tid);
       // Add the request into the queue
-      request_t request = {fd, filename};
+    //  request_t request = {fd, filename};
         //seg fault
       printf("DEBUG TID #%d created request_t", tid);
       while(req_next_to_store == req_next_to_retrieve){
@@ -236,7 +238,9 @@ void * dispatch(void *arg) {
         pthread_cond_wait(&space_for_request, &lock);
       }
       printf("DEBUG: TID #%d putting request into queue", tid);
-      requests[req_next_to_store] = request;
+        requests[req_next_to_store].fd = fd;
+        memset(requests[req_next_to_store].request,'\0',1024);
+        strncpy(requests[req_next_to_store].request, filename, 1024);
       printf("DEBUG: TID #%d successfully put request into queue", tid);
       pthread_cond_signal(&request_exists);
     } else {
@@ -398,6 +402,7 @@ int main(int argc, char **argv) {
 
   // Start the server and initialize cache
   init(port);
+    initQueue();
   initCache();
 
   // Create dispatcher and worker threads
