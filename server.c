@@ -180,6 +180,7 @@ char* readFromDisk(char *path) {
 
          char *fileContent = (char *) malloc(bytes);
          read(fd,fileContent,bytes);
+         fileContent[bytes] = '\0';
       return fileContent;
      }
 }
@@ -270,7 +271,7 @@ void * worker(void *arg) {
   char bytes_error[256];
   char cache_hit_miss[5];
   //char* content = NULL;
-    char content[10000000];
+    char *content;
   int contentBytes;
 
   while (1) {
