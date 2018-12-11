@@ -289,7 +289,7 @@ void * worker(void *arg) {
     current_req = requests[req_next_to_retrieve];
     printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
     // update index tracker for queue
-      req_current_items--;
+    req_current_items--;
     req_next_to_retrieve = (req_next_to_retrieve + 1) % qlen;
     pthread_mutex_unlock(&queuelock);
       
@@ -297,19 +297,25 @@ void * worker(void *arg) {
       
     pthread_mutex_lock(&cachelock);
     // Get the data from the disk or the cache
+     printf("DEBUG: WORKER TID #%d trying to get cache index\n", thread_id);
     cache_idx = getCacheIndex(current_req.request);
+      printf("DEBUG: WORKER TID #%d got cache index\n", thread_id);
     if (cache_idx != -1) {
+         printf("DEBUG: WORKER TID #%d request is in cache\n", thread_id);
       // Req is in cache
       snprintf(cache_hit_miss, 4, "HIT");
       current_entry = cache[cache_idx];
     } else {
       // Req is not in cache
+        printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
       snprintf(cache_hit_miss, 5, "MISS");
-
+           printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
       content = readFromDisk(current_req.request);
+          printf("DEBUG: WORKER TID #%d got request from disk\n", thread_id);
       contentBytes = strlen(content);
-
+        printf("DEBUG: WORKER TID #%d trying to add into cache\n", thread_id);
       addIntoCache(current_req.request,content,contentBytes);
+         printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
 
       current_entry = cache[cache_next_to_store-1];
     }
