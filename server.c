@@ -233,7 +233,7 @@ void * dispatch(void *arg) {
     pthread_mutex_lock(&queuelock);
       while(req_current_items == qlen){
         printf("DEBUG: DISPATCH TID #%d waiting for space in request queue\n", tid);
-        pthread_cond_wait(&space_for_request, &lock);
+        pthread_cond_wait(&space_for_request, &queuelock);
       }
       printf("DEBUG: DISPATCH TID #%d putting request into queue\n", tid);
         requests[req_next_to_store].fd = fd;
