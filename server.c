@@ -100,7 +100,8 @@ void * dynamic_pool_size_update(void *arg) {
 int getCacheIndex(char *request){
   int i;
   for(i = 0; i < cache_entries; i++) {
-    if (strcmp(cache[i].request,request) == 0) {
+    printf("DEBUG: getCacheIndex(): comparing to index %d in cache\n", i);
+    if (strcmp(cache[i].request, request) == 0) {
       return i;
     }
   }
@@ -168,21 +169,25 @@ void initQueue(){
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
 char* readFromDisk(char *path) {
-     struct stat filestats;
-     FILE *file = fopen(path,"r");
-    int fd = fileno(file);
-     if (fstat(fd,&filestats) < 0) {
-         printf("File at %s was unable to be read\n",path);
-         return NULL;
-     } else {
-         //man fstat to understand what this is doing
-         int bytes = filestats.st_size;
+  printf("DEBUG: readFromDisk(): stat struct being created...\n");
+  struct stat filestats;
+  printf("DEBUG: readFromDisk(): filepath being opened...\n");
+  FILE *file = fopen(path,"r");
+  printf("DEBUG: readFromDisk(): fd being created...\n");
+  int fd = fileno(file);
+  printf("DEBUG: readFromDisk(): checking success of read...\n");
+  if (fstat(fd,&filestats) < 0) {
+    printf("File at %s was unable to be read\n", path);
+    return NULL;
+  } else {
+    //man fstat to understand what this is doing
+    int bytes = filestats.st_size;
 
-         char *fileContent = (char *) malloc(bytes);
-         read(fd,fileContent,bytes);
-         fileContent[bytes] = '\0';
-      return fileContent;
-     }
+    char *fileContent = (char *) malloc(bytes);
+    read(fd,fileContent,bytes);
+    fileContent[bytes] = '\0';
+    return fileContent;
+  }
 }
 
 /**********************************************************************************/
@@ -229,7 +234,7 @@ void * dispatch(void *arg) {
     // Get request from the client
     if (get_request(fd, filename) == 0) {
       printf("DEBUG: DISPATCH TID #%d get_request() succeeded\n", tid);
-    
+
     //Critical Section
     pthread_mutex_lock(&queuelock);
       while(req_current_items == qlen){
@@ -245,12 +250,12 @@ void * dispatch(void *arg) {
       printf("DEBUG: DISPATCH TID #%d successfully put request into queue\n", tid);
         pthread_mutex_unlock(&queuelock);
       pthread_cond_broadcast(&request_exists);
-        
+
     } else {
       printf("DEBUG: DISPATCH TID #%d get_request() failed\n", tid);
     }
 
-    
+
     }
     return NULL;
 }
@@ -291,15 +296,15 @@ void * worker(void *arg) {
     current_req.fd = requests[req_next_to_retrieve].fd;
     memset(current_req.request,'\0',1024);
     strncpy(current_req.request, requests[req_next_to_retrieve].request, 1024);
-    
+
     printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
     // update index tracker for queue
     req_current_items--;
     req_next_to_retrieve = (req_next_to_retrieve + 1) % qlen;
     pthread_mutex_unlock(&queuelock);
-      
+
     pthread_cond_broadcast(&space_for_request);
-      
+
     pthread_mutex_lock(&cachelock);
     // Get the data from the disk or the cache
 //     printf("DEBUG: WORKER TID #%d trying to get cache index\n", thread_id);
@@ -354,7 +359,7 @@ void * worker(void *arg) {
     write(1, log_str, log_len);
       // a request has been handled so signal to a
       // dispatcher to handle a new one
- 
+
 
     req_num++;
         pthread_mutex_unlock(&cachelock);
