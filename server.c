@@ -172,10 +172,16 @@ char* readFromDisk(char *path) {
   printf("DEBUG: readFromDisk(): stat struct being created...\n");
   struct stat filestats;
   printf("DEBUG: readFromDisk(): filepath being opened...\n");
-  FILE *file = fopen(path,"r");
+  FILE *file = fopen(path, "r");
   printf("DEBUG: readFromDisk(): fd being created...\n");
-  int fd = fileno(file);
-  printf("DEBUG: readFromDisk(): checking success of read...\n");
+  if(file){
+        int fd = fileno(file);
+        printf("DEBUG: readFromDisk(): fileno was read...\n");
+  }
+  else {
+      printf("DEBUG: readFromDisk(): file was null...\n");
+      return NULL;
+  }
   if (fstat(fd,&filestats) < 0) {
     printf("File at %s was unable to be read\n", path);
     return NULL;
