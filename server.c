@@ -286,7 +286,10 @@ void * worker(void *arg) {
     start = getCurrentTimeInMills();
 
     // Get the request from the queue
-    current_req = requests[req_next_to_retrieve];
+    current_req.fd = requests[req_next_to_retrieve].fd;
+    memset(current_req.request,'\0',1024);
+    strncpy(current_req.request, requests[req_next_to_retrieve].request, 1024);
+    
     printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
     // update index tracker for queue
     req_current_items--;
