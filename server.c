@@ -285,13 +285,9 @@ void * worker(void *arg) {
 
     // Get the request from the queue
     current_req = requests[req_next_to_retrieve];
+    printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
     // update index tracker for queue
     req_next_to_retrieve = (req_next_to_retrieve + 1) % req_current_items;
-    printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
-
-    // a request has been handled so signal to a
-    // dispatcher to handle a new one
-    pthread_cond_broadcast(&space_for_request);
       
     // Get the data from the disk or the cache
     cache_idx = getCacheIndex(current_req.request);
@@ -315,8 +311,6 @@ void * worker(void *arg) {
     stop = getCurrentTimeInMills();
     elapsed = stop - start;
 
-
-
     // Return the result or set the error
     char * cType = getContentType(content);
     if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
@@ -324,8 +318,6 @@ void * worker(void *arg) {
     } else {
       sprintf(bytes_error, "%d", contentBytes);
     }
-
-
 
     // TODO Log the request into the file and terminal
     printf("DEBUG: before logging in worker\n");
@@ -342,7 +334,9 @@ void * worker(void *arg) {
 
     // Log to terminal
     write(1, log_str, log_len);
-
+      // a request has been handled so signal to a
+      // dispatcher to handle a new one
+    pthread_cond_broadcast(&space_for_request);
     pthread_mutex_unlock(&lock);
     req_num++;
   }
