@@ -222,28 +222,28 @@ void * dispatch(void *arg) {
   while (1) {
     // Accept client connection
     int tid = *(int *) arg;
-    printf("DEBUG: TID #%d Attempting Connection\n", tid);
+    printf("DEBUG: DISPATCH TID #%d Attempting Connection\n", tid);
     fd =  accept_connection();
     // Get request from the client
     if (get_request(fd, filename) == 0) {
-      printf("DEBUG: TID #%d get_request() succeeded\n", tid);
+      printf("DEBUG: DISPATCH TID #%d get_request() succeeded\n", tid);
     
     //Critical Section
     pthread_mutex_lock(&lock);
       while(req_current_items == qlen){
-        printf("DEBUG: TID #%d waiting for space in request queue\n", tid);
+        printf("DEBUG: DISPATCH TID #%d waiting for space in request queue\n", tid);
         pthread_cond_wait(&space_for_request, &lock);
       }
-      printf("DEBUG: TID #%d putting request into queue\n", tid);
+      printf("DEBUG: DISPATCH TID #%d putting request into queue\n", tid);
         requests[req_next_to_store].fd = fd;
         memset(requests[req_next_to_store].request,'\0',1024);
         strncpy(requests[req_next_to_store].request, filename, 1024);
         req_current_items++;
         req_next_to_store = (req_next_to_store + 1) % req_current_items;
-      printf("DEBUG: TID #%d successfully put request into queue\n", tid);
+      printf("DEBUG: DISPATCH TID #%d successfully put request into queue\n", tid);
       pthread_cond_signal(&request_exists);
     } else {
-      printf("DEBUG: TID #%d get_request() failed\n", tid);
+      printf("DEBUG: DISPATCH TID #%d get_request() failed\n", tid);
     }
 
     pthread_mutex_unlock(&lock);
@@ -275,11 +275,11 @@ void * worker(void *arg) {
 
     // wait until request queue is not empty
     while (req_next_to_store == req_next_to_retrieve) {
-      printf("DEBUG: TID #%d Waiting for a request\n", thread_id);
+      printf("DEBUG: WORKER TID #%d Waiting for a request\n", thread_id);
       pthread_cond_wait(&request_exists, &lock);
-      printf("DEBUG: TID #%d recieved signal\n", thread_id);
+      printf("DEBUG: WORKER TID #%d recieved signal\n", thread_id);
     }
-    printf("DEBUG: TID #%d handling request\n", thread_id);
+    printf("DEBUG: WORKER TID #%d handling request\n", thread_id);
 
     // Start recording time
     start = getCurrentTimeInMills();
@@ -288,7 +288,7 @@ void * worker(void *arg) {
     current_req = requests[req_next_to_retrieve];
     // update index tracker for queue
     req_next_to_retrieve = (req_next_to_retrieve + 1) % req_current_items;
-    printf("DEBUG: TID #%d got request out of queue\n", thread_id);
+    printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
 
     // a request has been handled so signal to a
     // dispatcher to handle a new one
