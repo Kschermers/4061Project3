@@ -173,7 +173,7 @@ char* readFromDisk(char *path) {
          //man fstat to understand what this is doing
          int bytes = filestats.st_size;
 
-         char *fileContent = (char *)malloc(bytes);
+         char *fileContent = (char *) malloc(bytes);
          read(fd,fileContent,bytes);
       return fileContent;
      }
@@ -225,15 +225,19 @@ void * dispatch(void *arg) {
     // Get request from the client
     char filename[1024];
 
-    if (get_request(fd, filename) != 0) {
+    if (get_request(fd, filename) == 0) {
       printf("DEBUG: TID #%d get_request() succeeded\n", tid);
       // Add the request into the queue
       request_t request = {fd, filename};
+
+      printf("DEBUG TID #%d created request_t", tid);
       while(req_next_to_store == req_next_to_retrieve){
         printf("DEBUG: TID #%d waiting for space in request queue\n", tid);
         pthread_cond_wait(&space_for_request, &lock);
       }
+      printf("DEBUG: TID #%d putting request into queue", tid);
       requests[req_next_to_store] = request;
+      printf("DEBUG: TID #%d successfully put request into queue", tid);
       pthread_cond_signal(&request_exists);
     } else {
       printf("DEBUG: TID #%d get_request() failed\n", tid);
@@ -268,8 +272,11 @@ void * worker(void *arg) {
 
     // wait until request queue is not empty
     while (req_next_to_store == (req_next_to_retrieve + 1)) {
+      printf("DEBUG: TID #%d Waiting for a request\n", thread_id);
       pthread_cond_wait(&request_exists, &lock);
+      printf("DEBUG: TID #%d recieved signal\n", thread_id);
     }
+    printf("DEBUG: TID #%d handling request\n", thread_id);
 
     // Start recording time
     start = getCurrentTimeInMills();
@@ -282,15 +289,12 @@ void * worker(void *arg) {
     } else {
       req_next_to_retrieve++;
     }
-
-    pthread_mutex_unlock(&lock);
+    printf("DEBUG: TID #%d got request out of queue", thread_id);
 
     // a request has been handled so signal to a
     // dispatcher to handle a new one
     pthread_cond_signal(&space_for_request);
 
-    // reacquire lock to begin working on cache
-    pthread_mutex_lock(&lock);
 
     // Get the data from the disk or the cache
     cache_idx = getCacheIndex(current_req.request);
@@ -317,7 +321,7 @@ void * worker(void *arg) {
 
 
     // Return the result or set the error
-      char * cType = getContentType(content);
+    char * cType = getContentType(content);
     if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
       return_error(current_req.fd, bytes_error);
     } else {
@@ -327,7 +331,7 @@ void * worker(void *arg) {
 
 
     // TODO Log the request into the file and terminal
-      printf("before logging in worker");
+    printf("DEBUG: before logging in worker\n");
     snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]",
              thread_id, req_num, current_req.fd, (char*) current_req.request,
              bytes_error, elapsed, cache_hit_miss);
