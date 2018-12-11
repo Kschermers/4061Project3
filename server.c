@@ -269,7 +269,8 @@ void * worker(void *arg) {
   int req_num = 0;
   char bytes_error[256];
   char cache_hit_miss[5];
-  char* content = NULL;
+  //char* content = NULL;
+    char content[10000000];
   int contentBytes;
 
   while (1) {
