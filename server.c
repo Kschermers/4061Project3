@@ -174,8 +174,9 @@ char* readFromDisk(char *path) {
   printf("DEBUG: readFromDisk(): filepath being opened...\n");
   FILE *file = fopen(path, "r");
   printf("DEBUG: readFromDisk(): fd being created...\n");
+  int fd;
   if(file){
-        int fd = fileno(file);
+        fd = fileno(file);
         printf("DEBUG: readFromDisk(): fileno was read...\n");
   }
   else {
