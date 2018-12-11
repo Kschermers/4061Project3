@@ -321,8 +321,6 @@ void * worker(void *arg) {
       snprintf(cache_hit_miss, 5, "MISS");
       printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
       char* full_path;
-      printf();
-      printf();
       full_path = strcat(path, ((char *) current_req.request));
       content = readFromDisk(full_path);
       if (content == NULL) {
