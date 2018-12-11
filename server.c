@@ -101,8 +101,10 @@ int getCacheIndex(char *request){
   int i;
   for(i = 0; i < cache_entries; i++) {
     printf("DEBUG: getCacheIndex(): comparing to index %d in cache\n", i);
-    if (strcmp(cache[i].request, request) == 0) {
-      return i;
+    if (cache[i].request != NULL) {
+      if (strcmp(cache[i].request, request) == 0) {
+        return i;
+      }
     }
   }
   return -1;
