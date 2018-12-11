@@ -46,7 +46,8 @@ int req_next_to_retrieve = 0;
 int cache_next_to_store = 0;
 int req_current_items = 0;
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t queuelock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t cachelock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t request_exists  = PTHREAD_COND_INITIALIZER;
 pthread_cond_t space_for_request = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cache_cv  = PTHREAD_COND_INITIALIZER;
@@ -118,7 +119,7 @@ void IncrementCacheCounter() {
 void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memeory when adding or replacing cache entries
-     pthread_mutex_lock(&lock);
+     pthread_mutex_lock(&cachelock);
 
      cache_entry_t toFree = cache[cache_next_to_store];
 
@@ -138,7 +139,7 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
      cache[cache_next_to_store] = toFree;
      IncrementCacheCounter();
 
-     pthread_mutex_unlock(&lock);
+     pthread_mutex_unlock(&cachelock);
 }
 
 // clear the memory allocated to the cache
@@ -229,7 +230,7 @@ void * dispatch(void *arg) {
       printf("DEBUG: DISPATCH TID #%d get_request() succeeded\n", tid);
     
     //Critical Section
-    pthread_mutex_lock(&lock);
+    pthread_mutex_lock(&queuelock);
       while(req_current_items == qlen){
         printf("DEBUG: DISPATCH TID #%d waiting for space in request queue\n", tid);
         pthread_cond_wait(&space_for_request, &lock);
@@ -246,7 +247,7 @@ void * dispatch(void *arg) {
       printf("DEBUG: DISPATCH TID #%d get_request() failed\n", tid);
     }
 
-    pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&queuelock);
     }
     return NULL;
 }
@@ -270,13 +271,12 @@ void * worker(void *arg) {
   int contentBytes;
 
   while (1) {
-    pthread_mutex_lock(&lock);
-    req_num++;
+    pthread_mutex_lock(&queuelock);
 
     // wait until request queue is not empty
     while (req_next_to_store == req_next_to_retrieve) {
       printf("DEBUG: WORKER TID #%d Waiting for a request\n", thread_id);
-      pthread_cond_wait(&request_exists, &lock);
+      pthread_cond_wait(&request_exists, &queuelock);
     }
     printf("DEBUG: WORKER TID #%d handling request\n", thread_id);
 
@@ -288,7 +288,10 @@ void * worker(void *arg) {
     printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
     // update index tracker for queue
     req_next_to_retrieve = (req_next_to_retrieve + 1) % req_current_items;
+          pthread_mutex_unlock(&queuelock);
+         pthread_cond_broadcast(&space_for_request);
       
+       pthread_mutex_lock(&cachelock);
     // Get the data from the disk or the cache
     cache_idx = getCacheIndex(current_req.request);
     if (cache_idx != -1) {
@@ -336,9 +339,10 @@ void * worker(void *arg) {
     write(1, log_str, log_len);
       // a request has been handled so signal to a
       // dispatcher to handle a new one
-    pthread_cond_broadcast(&space_for_request);
-    pthread_mutex_unlock(&lock);
+ 
+
     req_num++;
+        pthread_mutex_unlock(&cachelock);
   }
   return NULL;
 }
@@ -418,7 +422,8 @@ int main(int argc, char **argv) {
   }
 
   // Clean up
-  pthread_mutex_destroy(&lock);
+  pthread_mutex_destroy(&queuelock);
+  pthread_mutex_destroy(&cachelock);
   pthread_cond_destroy(&request_exists);
   pthread_cond_destroy(&space_for_request);
   pthread_cond_destroy(&cache_cv);
