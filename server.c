@@ -120,7 +120,6 @@ void IncrementCacheCounter() {
 void addIntoCache(char *mybuf, char *memory , int memory_size){
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memeory when adding or replacing cache entries
-     pthread_mutex_lock(&cachelock);
 
      cache_entry_t toFree = cache[cache_next_to_store];
 
@@ -139,8 +138,6 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
 
      cache[cache_next_to_store] = toFree;
      IncrementCacheCounter();
-
-     pthread_mutex_unlock(&cachelock);
 }
 
 // clear the memory allocated to the cache
@@ -169,10 +166,6 @@ void initQueue(){
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
 char* readFromDisk(char *path) {
-  char cwd[1024];
-  if (getcwd(cwd, sizeof(cwd)) != NULL) {
-    printf("DEBUG: readFromDisk(): current working directory is %s\n", cwd);
-  }
   printf("DEBUG: readFromDisk(): stat struct being created...\n");
   struct stat filestats;
   printf("DEBUG: readFromDisk(): file at path %s being opened...\n", path);
@@ -328,6 +321,8 @@ void * worker(void *arg) {
       snprintf(cache_hit_miss, 5, "MISS");
       printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
       char* full_path;
+      printf();
+      printf();
       full_path = strcat(path, ((char *) current_req.request));
       content = readFromDisk(full_path);
       if (content == NULL) {
@@ -357,7 +352,7 @@ void * worker(void *arg) {
 
     // TODO Log the request into the file and terminal
     printf("DEBUG: before logging in worker\n");
-    snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]",
+    snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]\n",
              thread_id, req_num, current_req.fd, (char*) current_req.request,
              bytes_error, elapsed, cache_hit_miss);
     int log_len = strlen(log_str);
