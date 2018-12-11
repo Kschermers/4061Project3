@@ -9,7 +9,7 @@ directory. Run your webserver using the following command
 For example, to run the web server at port 9000, with root directory "/home/student/joe/testing" with 100 dispatch and worker threads,
 queue length 100 run the following command
 
-./web_server 9000 ~/csci4061/4061-Project3-Group1/testing 100 100 0 100 100
+./web_server 1068 ~/csci4061/4061-Project3-Group1/testing 100 100 0 100 100
 
 You should now (using another terminal) be able to query a single file, such as the following:
 

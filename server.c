@@ -219,16 +219,16 @@ void * dispatch(void *arg) {
     char filename[1024];
     memset(filename,'\0',1024);
   while (1) {
-    pthread_mutex_lock(&lock);
     // Accept client connection
     int tid = *(int *) arg;
     printf("DEBUG: TID #%d Attempting Connection\n", tid);
     fd =  accept_connection();
     // Get request from the client
-    
-
     if (get_request(fd, filename) == 0) {
       printf("DEBUG: TID #%d get_request() succeeded\n", tid);
+    
+    //Critical Section
+    pthread_mutex_lock(&lock);
       while(req_next_to_store == req_next_to_retrieve){
         printf("DEBUG: TID #%d waiting for space in request queue\n", tid);
         pthread_cond_wait(&space_for_request, &lock);
