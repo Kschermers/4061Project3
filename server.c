@@ -217,7 +217,7 @@ int getCurrentTimeInMills() {
 void * dispatch(void *arg) {
   int fd;
     char filename[1024];
-    memset(filename_buffer,'\0',1024);
+    memset(filename,'\0',1024);
   while (1) {
     pthread_mutex_lock(&lock);
     // Accept client connection
