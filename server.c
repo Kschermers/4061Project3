@@ -307,10 +307,10 @@ void * worker(void *arg) {
 
     pthread_mutex_lock(&cachelock);
     // Get the data from the disk or the cache
-//     printf("DEBUG: WORKER TID #%d trying to get cache index\n", thread_id);
-//    cache_idx = getCacheIndex(current_req.request);
-//      printf("DEBUG: WORKER TID #%d got cache index\n", thread_id);
-    if (0) {
+     printf("DEBUG: WORKER TID #%d trying to get cache index\n", thread_id);
+    cache_idx = getCacheIndex(current_req.request);
+      printf("DEBUG: WORKER TID #%d got cache index\n", thread_id);
+    if (cache_idx!=-1) {
          printf("DEBUG: WORKER TID #%d request is in cache\n", thread_id);
       // Req is in cache
       snprintf(cache_hit_miss, 4, "HIT");
