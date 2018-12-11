@@ -42,8 +42,9 @@ int cache_entries;
 
 // request and cache indices
 int req_next_to_store = 0;
-int req_next_to_retrieve = -1;
+int req_next_to_retrieve = 0;
 int cache_next_to_store = 0;
+int req_current_items = 0;
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t request_exists  = PTHREAD_COND_INITIALIZER;
@@ -229,7 +230,7 @@ void * dispatch(void *arg) {
     
     //Critical Section
     pthread_mutex_lock(&lock);
-      while(req_next_to_store == req_next_to_retrieve){
+      while(req_current_items == qlen){
         printf("DEBUG: TID #%d waiting for space in request queue\n", tid);
         pthread_cond_wait(&space_for_request, &lock);
       }
@@ -237,6 +238,8 @@ void * dispatch(void *arg) {
         requests[req_next_to_store].fd = fd;
         memset(requests[req_next_to_store].request,'\0',1024);
         strncpy(requests[req_next_to_store].request, filename, 1024);
+        req_next_to_store = (req_next_to_store + 1) % req_current_items;
+        req_current_items++;
       printf("DEBUG: TID #%d successfully put request into queue\n", tid);
       pthread_cond_signal(&request_exists);
     } else {
@@ -271,7 +274,7 @@ void * worker(void *arg) {
     req_num++;
 
     // wait until request queue is not empty
-    while (req_next_to_store == (req_next_to_retrieve + 1)) {
+    while (req_next_to_store == req_next_to_retrieve) {
       printf("DEBUG: TID #%d Waiting for a request\n", thread_id);
       pthread_cond_wait(&request_exists, &lock);
       printf("DEBUG: TID #%d recieved signal\n", thread_id);
@@ -284,11 +287,7 @@ void * worker(void *arg) {
     // Get the request from the queue
     current_req = requests[req_next_to_retrieve];
     // update index tracker for queue
-    if(req_next_to_retrieve == (qlen-1)) {
-      req_next_to_retrieve = 0;
-    } else {
-      req_next_to_retrieve++;
-    }
+    req_next_to_retrieve = (req_next_to_retrieve + 1) % req_current_items;
     printf("DEBUG: TID #%d got request out of queue\n", thread_id);
 
     // a request has been handled so signal to a
