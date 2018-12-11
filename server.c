@@ -229,7 +229,7 @@ void * dispatch(void *arg) {
       printf("DEBUG: TID #%d get_request() succeeded\n", tid);
       // Add the request into the queue
       request_t request = {fd, filename};
-
+        //seg fault
       printf("DEBUG TID #%d created request_t", tid);
       while(req_next_to_store == req_next_to_retrieve){
         printf("DEBUG: TID #%d waiting for space in request queue\n", tid);
