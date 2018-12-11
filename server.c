@@ -277,7 +277,6 @@ void * worker(void *arg) {
     while (req_next_to_store == req_next_to_retrieve) {
       printf("DEBUG: WORKER TID #%d Waiting for a request\n", thread_id);
       pthread_cond_wait(&request_exists, &lock);
-      printf("DEBUG: WORKER TID #%d recieved signal\n", thread_id);
     }
     printf("DEBUG: WORKER TID #%d handling request\n", thread_id);
 
@@ -293,8 +292,7 @@ void * worker(void *arg) {
     // a request has been handled so signal to a
     // dispatcher to handle a new one
     pthread_cond_signal(&space_for_request);
-
-
+      
     // Get the data from the disk or the cache
     cache_idx = getCacheIndex(current_req.request);
     if (cache_idx != -1) {
