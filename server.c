@@ -287,11 +287,13 @@ void * worker(void *arg) {
     current_req = requests[req_next_to_retrieve];
     printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
     // update index tracker for queue
+      req_current_items--;
     req_next_to_retrieve = (req_next_to_retrieve + 1) % req_current_items;
-          pthread_mutex_unlock(&queuelock);
-         pthread_cond_broadcast(&space_for_request);
+    pthread_mutex_unlock(&queuelock);
       
-       pthread_mutex_lock(&cachelock);
+    pthread_cond_broadcast(&space_for_request);
+      
+    pthread_mutex_lock(&cachelock);
     // Get the data from the disk or the cache
     cache_idx = getCacheIndex(current_req.request);
     if (cache_idx != -1) {
@@ -402,15 +404,15 @@ int main(int argc, char **argv) {
   int tids[num_workers + num_dispatch];
 
   int i;
-  for (i = 0; i < num_workers; i++) {
+  for (i = 0; i < num_dispatch; i++) {
     tids[i] = i;
-    pthread_create(&workers[i], NULL, worker, &tids[i]);
+    pthread_create(&dispatchers[i], NULL, dispatch, &tids[i]);
   }
 
   int j = i;
-  for(; i < num_dispatch + j; i++) {
+  for(; i < num_workers + j; i++) {
     tids[i] = i;
-    pthread_create(&dispatchers[i-j], NULL, dispatch, &tids[i]);
+    pthread_create(&workers[i-j], NULL, worker, &tids[i]);
   }
 
   for (i = 0; i < num_dispatch; i++) {
