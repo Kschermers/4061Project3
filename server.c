@@ -280,7 +280,6 @@ void * worker(void *arg) {
 
   while (1) {
     pthread_mutex_lock(&queuelock);
-      cache_entry_t current_entry;
       request_t current_req;
     // wait until request queue is not empty
     while (req_next_to_store == req_next_to_retrieve) {
@@ -314,8 +313,11 @@ void * worker(void *arg) {
          printf("DEBUG: WORKER TID #%d request is in cache\n", thread_id);
       // Req is in cache
       snprintf(cache_hit_miss, 4, "HIT");
-      current_entry = cache[cache_idx];
-    } else {
+      content = cache[cache_idx].content;
+      contentBytes = cache[cache_idx].len;
+    }
+      
+    else {
       // Req is not in cache
       printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
       snprintf(cache_hit_miss, 5, "MISS");
@@ -332,8 +334,6 @@ void * worker(void *arg) {
       printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
       addIntoCache(current_req.request, content, contentBytes);
       printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
-
-      current_entry = cache[cache_next_to_store-1];
     }
 
     // Stop recording the time
@@ -348,29 +348,18 @@ void * worker(void *arg) {
       req_num++;
       sprintf(bytes_error, "%d", contentBytes);
     }
-
-    // TODO Log the request into the file and terminal
     printf("DEBUG: before logging in worker\n");
     snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]\n",
              thread_id, req_num, current_req.fd, (char*) current_req.request,
              bytes_error, elapsed, cache_hit_miss);
     int log_len = strlen(log_str);
-
-    // TODO finish logging
-    // Log to file
     FILE* log_file = fopen("webserver_log.txt", "w");
     int log_fd = fileno(log_file);
     write(log_fd, log_str, log_len);
 
     // Log to terminal
     write(1, log_str, log_len);
-      // a request has been handled so signal to a
-      // dispatcher to handle a new one
-
-
-   
-     
-     pthread_mutex_unlock(&cachelock);
+    pthread_mutex_unlock(&cachelock);
   }
   return NULL;
 }
