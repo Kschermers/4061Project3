@@ -340,7 +340,7 @@ void * worker(void *arg) {
             strcpy(full_path, path);
             strcat(full_path, ((char *) current_req.request));
             
-            int readReturn = readFromDisk(full_path,content);
+            int readReturn = readFromDisk(full_path,&content);
             
             if (readReturn < 0) {
                 
