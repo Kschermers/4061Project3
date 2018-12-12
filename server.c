@@ -127,17 +127,16 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
      }
 
      toFree.request = (char*) malloc(strlen(mybuf));
-     toFree.request = mybuf;
+     strcpy(toFree.request, mybuf);
     printf("DEBUG: cache index %d assigned new request: %s\n",cache_next_to_store,toFree.request);
      toFree.content = (char*) malloc(strlen(memory));
-     toFree.content = memory;
+     strcpy(toFree.content, memory);
      toFree.len = memory_size;
 
      toFree.flag = 1;
 
      cache[cache_next_to_store] = toFree;
-    free(toFree.request);
-    free(toFree.content);
+    
     cache_next_to_store = (cache_next_to_store + 1) % cache_entries;
 }
 
@@ -313,7 +312,7 @@ void * worker(void *arg) {
       content = cache[cache_idx].content;
       contentBytes = cache[cache_idx].len;
     }
-      
+
     else {
       // Req is not in cache
       printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);

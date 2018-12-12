@@ -1,1 +1,1 @@
-[1][21][26][/text/html/6.html][6280][38ms][HIT]
+[1][1][4][/image/jpg/26.jpg][4][1061ms][MISS]
