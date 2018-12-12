@@ -290,7 +290,7 @@ void * worker(void *arg) {
         char *content;
         int contentBytes;
         char full_path[2048];
-         char bytes_error[256];
+        char bytes_error[256];
         request_t current_req;
         // wait until request queue is not empty
         while (req_next_to_store == req_next_to_retrieve) {
@@ -351,6 +351,7 @@ void * worker(void *arg) {
         char * cType = getContentType(full_path);
         if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
             int retError = return_error(current_req.fd, content);
+            strcpy(,bytes_error,"unspecified");
             printf("DEBUG: error returned: message is %s, with return val of %d\n",bytes_error,retError);
         } else {
             sprintf(bytes_error,"%d",contentBytes);
