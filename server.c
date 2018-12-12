@@ -167,30 +167,35 @@ void initQueue(){
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
 char* readFromDisk(char *path) {
-    struct stat filestats;
+    //  struct stat filestats;
     printf("DEBUG: readFromDisk(): path %s being opened...\n", path);
-    FILE *file = fopen(path, "r");
+    FILE* file = fopen(path, "rb");
     if (file == NULL) {
         printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
         return NULL;
     } else {
         printf("DEBUG: readFromDisk(): fopen() returned file\n");
     }
-    int fd = fileno(file);
-    printf("DEBUG: readFromDisk(): fileno(file) returned %d\n", fd);
-    if (fstat(fd, &filestats) < 0) {
-        printf("File at %s was unable to be read\n", path);
-        return NULL;
-    } else {
-        //man fstat to understand what this is doing
-        int bytes = filestats.st_size;
-        printf("DEBUG: readFromDisk(): bytes = %d\n", bytes);
-        char *fileContent = (char *) malloc(sizeof(char) * bytes);
-        memset(fileContent, '\0', bytes);
-        fread(fileContent, bytes, 1, file);
-        fileContent[bytes] = '\0';
-        return fileContent;
-    }
+    //  int fd = fileno(file);
+    //  printf("DEBUG: readFromDisk(): fileno(file) returned %d\n", fd);
+    //  if (fstat(fd, &filestats) < 0) {
+    //    printf("File at %s was unable to be read\n", path);
+    //    return NULL;
+    //  } else {
+    //man fstat to understand what this is doing
+    //   int bytes = filestats.st_size;
+    
+    //  char *fileContent = (char *) malloc(bytes);
+    //  read(fd,fileContent,bytes);
+    //    fileContent[bytes] = '\0';
+    fseek(file, 0, SEEK_END);
+    long len=ftell(file);
+    fseek(file, 0, SEEK_SET);
+    char* content=(char *)malloc(len+1);
+    fread(content, len, 1, file);
+    content[len] = '\0';
+    return content;
+    //}
 }
 
 /**********************************************************************************/
