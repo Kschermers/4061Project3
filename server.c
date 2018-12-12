@@ -283,6 +283,7 @@ void * worker(void *arg) {
         pthread_mutex_lock(&queuelock);
         char *content;
         int contentBytes;
+        char full_path[2048];
         request_t current_req;
         // wait until request queue is not empty
         while (req_next_to_store == req_next_to_retrieve) {
@@ -319,7 +320,7 @@ void * worker(void *arg) {
             content = cache[cache_idx].content;
             contentBytes = cache[cache_idx].len;
         }
-        char full_path[2048];
+        
         else {
             // Req is not in cache
             printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
