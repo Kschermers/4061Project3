@@ -348,11 +348,12 @@ void * worker(void *arg) {
         // Return the result or set the error
         char * cType = getContentType(full_path);
         if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
+            itoa(contentBytes,bytes_error,10);
             return_error(current_req.fd, bytes_error);
         } else {
-            req_num++;
-            sprintf(bytes_error, "%d", contentBytes);
+            itoa(contentBytes,bytes_error,10);
         }
+        req_num++;
         printf("DEBUG: before logging in worker\n");
         snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]\n",
                  thread_id, req_num, current_req.fd, (char*) current_req.request,
