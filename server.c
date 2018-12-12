@@ -160,13 +160,13 @@ void initQueue(){
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
-char* readFromDisk(char *path) {
+int readFromDisk(char *path,char *content) {
     //  struct stat filestats;
     printf("DEBUG: readFromDisk(): path %s being opened...\n", path);
     FILE* file = fopen(path, "rb");
     if (file == NULL) {
         printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
-        return NULL;
+        return -1;
     } else {
         printf("DEBUG: readFromDisk(): fopen() returned file\n");
     }
@@ -190,7 +190,7 @@ char* readFromDisk(char *path) {
     printf("DEBUG: readFromDisk(): Length of file is %d\n", len);
 
     // Allocate space for content
-    char* content = (char *) malloc(len+1);
+    content = (char *) malloc(len+1);
 
     // Read from file into content buffer
     fread(content, 1, len, file);
@@ -198,7 +198,7 @@ char* readFromDisk(char *path) {
 
     printf("DEBUG: readFromDisk(): Length written to file is %d\n", strlen(content));
 
-    return content;
+    return 0;
     //}
 }
 
@@ -339,11 +339,16 @@ void * worker(void *arg) {
             char full_path[2048];
             strcpy(full_path, path);
             strcat(full_path, ((char *) current_req.request));
-            content = readFromDisk(full_path);
-            if (content == NULL) {
+            
+            int readReturn = readFromDisk(full_path,content);
+            
+            if (readReturn < 0) {
+                
                 printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id);
+                
                 pthread_mutex_unlock(&cachelock);
                 return NULL;
+                
             } else {
                 printf("DEBUG: WORKER TID #%d: readFromDisk() returned some content\n", thread_id);
             }
