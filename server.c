@@ -414,7 +414,7 @@ int main(int argc, char **argv) {
         return -1;
     }
     // Change the current working directory to server root directory
-    // chdir(path);
+    chdir(path);
 
     // Start the server and initialize cache
     init(port);
