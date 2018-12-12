@@ -331,42 +331,41 @@ void * worker(void *arg) {
       strcat(full_path, ((char *) current_req.request));
       content = readFromDisk(full_path);
       if (content != NULL) {
-    printf("DEBUG: WORKER TID #%d: readFromDisk() returned some content\n", thread_id, content);
+            printf("DEBUG: WORKER TID #%d: readFromDisk() returned some content\n", thread_id, content);
       
-      contentBytes = strlen(content);
-      printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
-      addIntoCache(current_req.request, content, contentBytes);
-      printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
+          contentBytes = strlen(content);
+            printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
+          addIntoCache(current_req.request, content, contentBytes);
+          printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
     
 
-    // Stop recording the time
-    stop = getCurrentTimeInMills();
-    elapsed = stop - start;
+          // Stop recording the time
+          stop = getCurrentTimeInMills();
+            elapsed = stop - start;
 
-    // Return the result or set the error
-    char * cType = getContentType(current_req.request);
-    if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
-      return_error(current_req.fd, bytes_error);
-    } else {
-      req_num++;
-      sprintf(bytes_error, "%d", contentBytes);
-    }
-    printf("DEBUG: before logging in worker\n");
-    snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]\n",
+          // Return the result or set the error
+          char * cType = getContentType(current_req.request);
+          if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
+              return_error(current_req.fd, bytes_error);
+          } else {
+              req_num++;
+              sprintf(bytes_error, "%d", contentBytes);
+          }
+          printf("DEBUG: before logging in worker\n");
+          snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]\n",
              thread_id, req_num, current_req.fd, (char*) current_req.request,
              bytes_error, elapsed, cache_hit_miss);
-    int log_len = strlen(log_str);
-    FILE* log_file = fopen("webserver_log.txt", "w");
-    int log_fd = fileno(log_file);
-    write(log_fd, log_str, log_len);
-
-    // Log to terminal
-    write(1, log_str, log_len);
-    pthread_mutex_unlock(&cachelock);
-      }
-    } else {
-        printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id, content);
-        }
+          int log_len = strlen(log_str);
+          FILE* log_file = fopen("webserver_log.txt", "w");
+          int log_fd = fileno(log_file);
+          write(log_fd, log_str, log_len);
+          
+          // Log to terminal
+          write(1, log_str, log_len);
+          pthread_mutex_unlock(&cachelock);
+          } else {
+                printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id, content);
+          }
     }
   return NULL;
 }
