@@ -167,7 +167,7 @@ int readFromDisk(char *path,char *content, int *size) {
     if (file == NULL) {
         printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
         content = NULL;
-        len = -1;
+        *size = -1;
         return -1;
     } else {
         printf("DEBUG: readFromDisk(): fopen() returned file\n");
@@ -180,7 +180,7 @@ int readFromDisk(char *path,char *content, int *size) {
 
     // Allocate space for content
     content = (char *) malloc(len+1);
-    size = len;
+    *size = len;
     // Read from file into content buffer
     fread(content, 1, len, file);
     content[len] = '\0';
@@ -278,8 +278,7 @@ void * worker(void *arg) {
     int req_num = 0;
     char bytes_error[256];
     char cache_hit_miss[5];
-    int contentBytes;
-
+    
     while (1) {
         pthread_mutex_lock(&queuelock);
         char *content;
@@ -318,7 +317,7 @@ void * worker(void *arg) {
             // Req is in cache
             snprintf(cache_hit_miss, 4, "HIT");
             content = cache[cache_idx].content;
-            contentBytes = cache[cache_idx].len;
+            *contentBytes = cache[cache_idx].len;
         }
 
         else {
@@ -331,7 +330,7 @@ void * worker(void *arg) {
             strcat(full_path, ((char *) current_req.request));
             if(readFromDisk(full_path,&content, &contentBytes) > 0){
                 printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
-                addIntoCache(current_req.request, content, contentBytes);
+                addIntoCache(current_req.request, content, *contentBytes);
                 printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
             }
         }
@@ -342,11 +341,11 @@ void * worker(void *arg) {
 
         // Return the result or set the error
         char * cType = getContentType(current_req.request);
-        if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
+        if (return_result(current_req.fd, cType, content, *contentBytes) != 0) {
             return_error(current_req.fd, bytes_error);
         } else {
             req_num++;
-            sprintf(bytes_error, "%d", contentBytes);
+            sprintf(bytes_error, "%d", *contentBytes);
         }
         printf("DEBUG: before logging in worker\n");
         snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]\n",
