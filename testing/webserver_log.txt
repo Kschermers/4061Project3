@@ -1,0 +1,8 @@
+[10][1][4][/text/plain/10.txt][139][2318ms][MISS]
+[12][1][5][/text/plain/10.txt][139][4ms][HIT]
+[11][1][5][/text/plain/10.txt][139][2224ms][MISS]
+[10][1][6][/text/plain/10.txt][139][4ms][HIT]
+[12][1][5][/text/plain/10.txt][139][5ms][HIT]
+[16][1][6][/text/plain/10.txt][139][3ms][HIT]
+[17][1][5][/text/plain/10.txt][139][3ms][HIT]
+[13][1][6][/text/plain/10.txt][139][3ms][HIT]

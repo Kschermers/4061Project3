@@ -49,10 +49,13 @@ int req_current_items = 0;
 
 pthread_mutex_t queuelock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t cachelock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t loglock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t request_exists  = PTHREAD_COND_INITIALIZER;
 pthread_cond_t space_for_request = PTHREAD_COND_INITIALIZER;
-pthread_cond_t cache_cv  = PTHREAD_COND_INITIALIZER;
 
+
+FILE* log_file;
+int log_fd;
 // structs:
 typedef struct request_queue {
     int fd;
@@ -344,7 +347,7 @@ void * worker(void *arg) {
         // Stop recording the time
         stop = getCurrentTimeInMills();
         elapsed = stop - start;
-
+	
         // Return the result or set the error
         char * cType = getContentType(full_path);
         int retError;
@@ -357,18 +360,20 @@ void * worker(void *arg) {
             sprintf(bytes_error,"%d",contentBytes);
         }
         req_num++;
+	pthread_mutex_unlock(&cachelock);
+
+	pthread_mutex_lock(&loglock);
         //printf("DEBUG: before logging in worker\n");
         snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]\n",
                  thread_id, req_num, current_req.fd, (char*) current_req.request,
                  bytes_error, elapsed, cache_hit_miss);
         int log_len = strlen(log_str);
-        FILE* log_file = fopen("webserver_log.txt", "w");
-        int log_fd = fileno(log_file);
+
         write(log_fd, log_str, log_len);
 
         // Log to terminal
         write(1, log_str, log_len);
-        pthread_mutex_unlock(&cachelock);
+        pthread_mutex_unlock(&loglock);
     }
     return NULL;
 }
@@ -422,6 +427,8 @@ int main(int argc, char **argv) {
     initQueue();
     initCache();
 
+    log_file = fopen("webserver_log.txt", "ab+");
+    log_fd = fileno(log_file);
     // Create dispatcher and worker threads
     pthread_t dispatchers[num_dispatch];
     pthread_t workers[num_workers];
@@ -450,9 +457,10 @@ int main(int argc, char **argv) {
     // Clean up
     pthread_mutex_destroy(&queuelock);
     pthread_mutex_destroy(&cachelock);
+    pthread_mutex_destroy(&loglock);
     pthread_cond_destroy(&request_exists);
     pthread_cond_destroy(&space_for_request);
-    pthread_cond_destroy(&cache_cv);
+	//do we need to delete queue
     deleteCache();
     return 0;
 }
