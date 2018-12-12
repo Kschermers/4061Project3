@@ -201,7 +201,7 @@ char* getContentType(char * mybuf) {
      if(mybuf[len-5]=='.' && mybuf[len-4]=='h' && mybuf[len-3]=='t'&& mybuf[len-2]=='m'&& mybuf[len-1]=='l'){
                 return "text/html";
       }
-    else if(mybuf[len-5]=='.' && mybuf[len-3]=='j' && mybuf[len-2]=='p'&& mybuf[len-1]=='g'){
+    else if(mybuf[len-4]=='.' && mybuf[len-3]=='j' && mybuf[len-2]=='p'&& mybuf[len-1]=='g'){
           return "image/jpg";
            }
       else if(mybuf[len-4]=='.' && mybuf[len-3]=='g' && mybuf[len-2]=='i'&& mybuf[len-1]=='f'){
