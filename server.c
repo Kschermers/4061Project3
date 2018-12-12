@@ -171,6 +171,7 @@ char* readFromDisk(char *path) {
   FILE *file = fopen(path, "r");
   if (file == NULL) {
     printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
+      return NULL;
   } else {
     printf("DEBUG: readFromDisk(): fopen() returned file\n");
   }
@@ -322,16 +323,14 @@ void * worker(void *arg) {
       strcpy(full_path, path);
       strcat(full_path, ((char *) current_req.request));
       content = readFromDisk(full_path);
-      if (content == NULL) {
-        printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id, content);
-      } else {
-        printf("DEBUG: WORKER TID #%d: readFromDisk() returned some content\n", thread_id, content);
-      }
+      if (content != NULL) {
+    printf("DEBUG: WORKER TID #%d: readFromDisk() returned some content\n", thread_id, content);
+      
       contentBytes = strlen(content);
       printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
       addIntoCache(current_req.request, content, contentBytes);
       printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
-    }
+    
 
     // Stop recording the time
     stop = getCurrentTimeInMills();
@@ -357,7 +356,11 @@ void * worker(void *arg) {
     // Log to terminal
     write(1, log_str, log_len);
     pthread_mutex_unlock(&cachelock);
-  }
+      }
+    } else {
+        printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id, content);
+        }
+    }
   return NULL;
 }
 
