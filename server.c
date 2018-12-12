@@ -124,8 +124,8 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
     toFree.request = (char*) malloc(strlen(mybuf));
     strcpy(toFree.request, mybuf);
     printf("DEBUG: cache index %d assigned new request: %s\n",cache_next_to_store,toFree.request);
-    toFree.content = (char*) malloc(strlen(memory));
-    strcpy(toFree.content, memory);
+    toFree.content = (char*) malloc(memory_size);
+    memcpy(toFree.content, memory, memory_size + 1);
     toFree.len = memory_size;
 
     toFree.flag = 1;
@@ -160,29 +160,18 @@ void initQueue(){
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
-int readFromDisk(char *path,char *content) {
+int readFromDisk(char *path,char *content, int *size) {
     //  struct stat filestats;
     printf("DEBUG: readFromDisk(): path %s being opened...\n", path);
-    FILE* file = fopen(path, "rb");
+    FILE* file = fopen(path, "r");
     if (file == NULL) {
         printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
+        content = NULL;
+        len = -1;
         return -1;
     } else {
         printf("DEBUG: readFromDisk(): fopen() returned file\n");
     }
-    //  int fd = fileno(file);
-    //  printf("DEBUG: readFromDisk(): fileno(file) returned %d\n", fd);
-    //  if (fstat(fd, &filestats) < 0) {
-    //    printf("File at %s was unable to be read\n", path);
-    //    return NULL;
-    //  } else {
-    //man fstat to understand what this is doing
-    //   int bytes = filestats.st_size;
-
-    //  char *fileContent = (char *) malloc(bytes);
-    //  read(fd,fileContent,bytes);
-    //    fileContent[bytes] = '\0';
-
     // Determine length of file
     fseek(file, 0, SEEK_END);
     long len = ftell(file);
@@ -191,7 +180,7 @@ int readFromDisk(char *path,char *content) {
 
     // Allocate space for content
     content = (char *) malloc(len+1);
-
+    size = len;
     // Read from file into content buffer
     fread(content, 1, len, file);
     content[len] = '\0';
@@ -294,6 +283,7 @@ void * worker(void *arg) {
     while (1) {
         pthread_mutex_lock(&queuelock);
         char *content;
+        int *contentBytes;
         request_t current_req;
         // wait until request queue is not empty
         while (req_next_to_store == req_next_to_retrieve) {
@@ -339,23 +329,11 @@ void * worker(void *arg) {
             char full_path[2048];
             strcpy(full_path, path);
             strcat(full_path, ((char *) current_req.request));
-            
-            int readReturn = readFromDisk(full_path,&content);
-            
-            if (readReturn < 0) {
-                
-                printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id);
-                
-                pthread_mutex_unlock(&cachelock);
-                return NULL;
-                
-            } else {
-                printf("DEBUG: WORKER TID #%d: readFromDisk() returned some content\n", thread_id);
+            if(readFromDisk(full_path,&content, &contentBytes) > 0){
+                printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
+                addIntoCache(current_req.request, content, contentBytes);
+                printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
             }
-            contentBytes = strlen(content);
-            printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
-            addIntoCache(current_req.request, content, contentBytes);
-            printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
         }
 
         // Stop recording the time
