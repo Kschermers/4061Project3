@@ -180,9 +180,10 @@ int readFromDisk(char *path,char **content, int *size) {
 
     // Allocate space for content
     *content = (char *) malloc(len+1);
+    printf("DEBUG: content malloced in RFD\n");
     *size = len;
     // Read from file into content buffer
-    fread(content, len, 1, file);
+    fread(*content, len, 1, file);
     *content[len] = '\0';
 
     printf("DEBUG: readFromDisk(): Length written to file is %d\n", strlen(content));
