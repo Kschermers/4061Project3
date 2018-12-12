@@ -160,13 +160,13 @@ void initQueue(){
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
-int readFromDisk(char *path,char *content, int *size) {
+int readFromDisk(char *path,char **content, int *size) {
     //  struct stat filestats;
     printf("DEBUG: readFromDisk(): path %s being opened...\n", path);
     FILE* file = fopen(path, "r");
     if (file == NULL) {
         printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
-        content = NULL;
+        *content = NULL;
         *size = -1;
         return -1;
     } else {
@@ -179,7 +179,7 @@ int readFromDisk(char *path,char *content, int *size) {
     printf("DEBUG: readFromDisk(): Length of file is %d\n", len);
 
     // Allocate space for content
-    content = (char *) malloc(len+1);
+    *content = (char *) malloc(len+1);
     *size = len;
     // Read from file into content buffer
     fread(content, 1, len, file);
@@ -282,7 +282,7 @@ void * worker(void *arg) {
     while (1) {
         pthread_mutex_lock(&queuelock);
         char *content;
-        int *contentBytes;
+        int contentBytes;
         request_t current_req;
         // wait until request queue is not empty
         while (req_next_to_store == req_next_to_retrieve) {
@@ -317,7 +317,7 @@ void * worker(void *arg) {
             // Req is in cache
             snprintf(cache_hit_miss, 4, "HIT");
             content = cache[cache_idx].content;
-            *contentBytes = cache[cache_idx].len;
+            contentBytes = cache[cache_idx].len;
         }
 
         else {
@@ -330,7 +330,7 @@ void * worker(void *arg) {
             strcat(full_path, ((char *) current_req.request));
             if(readFromDisk(full_path,&content, &contentBytes) > 0){
                 printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
-                addIntoCache(current_req.request, content, *contentBytes);
+                addIntoCache(current_req.request, content, contentBytes);
                 printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
             }
         }
@@ -341,11 +341,11 @@ void * worker(void *arg) {
 
         // Return the result or set the error
         char * cType = getContentType(current_req.request);
-        if (return_result(current_req.fd, cType, content, *contentBytes) != 0) {
+        if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
             return_error(current_req.fd, bytes_error);
         } else {
             req_num++;
-            sprintf(bytes_error, "%d", *contentBytes);
+            sprintf(bytes_error, "%d", contentBytes);
         }
         printf("DEBUG: before logging in worker\n");
         snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]\n",
