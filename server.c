@@ -289,11 +289,11 @@ void * worker(void *arg) {
     int req_num = 0;
     char bytes_error[256];
     char cache_hit_miss[5];
-    char *content;
     int contentBytes;
 
     while (1) {
         pthread_mutex_lock(&queuelock);
+        char *content;
         request_t current_req;
         // wait until request queue is not empty
         while (req_next_to_store == req_next_to_retrieve) {
