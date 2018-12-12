@@ -334,7 +334,7 @@ void * worker(void *arg) {
             if (content == NULL) {
                 printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id, content);
                 pthread_mutex_unlock(&cachelock);
-                break;
+                return NULL;
             } else {
                 printf("DEBUG: WORKER TID #%d: readFromDisk() returned some content\n", thread_id, content);
             }
