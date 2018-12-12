@@ -343,6 +343,7 @@ void * worker(void *arg) {
     if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
       return_error(current_req.fd, bytes_error);
     } else {
+      req_num++;
       sprintf(bytes_error, "%d", contentBytes);
     }
 
@@ -365,7 +366,8 @@ void * worker(void *arg) {
       // dispatcher to handle a new one
 
 
-    req_num++;
+   
+      current_entry = NULL;
         pthread_mutex_unlock(&cachelock);
   }
   return NULL;
