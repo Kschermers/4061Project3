@@ -203,7 +203,7 @@ char* getContentType(char * mybuf) {
                 return "text/html";
       }
     else if(mybuf[len-5]=='.' && mybuf[len-4]=='j' && mybuf[len-3]=='p'&& mybuf[len-2]=='e'&& mybuf[len-1]=='g'){
-          return "image/jpeg";
+          return "image/jpg";
            }
       else if(mybuf[len-4]=='.' && mybuf[len-3]=='g' && mybuf[len-2]=='i'&& mybuf[len-1]=='f'){
           return "image/gif";
