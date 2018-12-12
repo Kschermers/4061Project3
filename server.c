@@ -202,11 +202,11 @@ int readFromDisk(char *path,char **content, int *size) {
 // Function to get the content type from the request
 char* getContentType(char * mybuf) {
     int len = strlen(mybuf);
-    if (mybuf == NULL) {
-        printf("DEBUG: getContentType(): input is NULL");
-    } else {
-        printf("DEBUG: Getting content type of %s\n", mybuf);
-    }
+    //if (mybuf == NULL) {
+        //printf("DEBUG: getContentType(): input is NULL");
+    //} else {
+        //printf("DEBUG: Getting content type of %s\n", mybuf);
+    //}
 
     // Should return the content type based on the file type in the request
     // (See Section 5 in Project description for more details)
@@ -298,7 +298,7 @@ void * worker(void *arg) {
             // printf("DEBUG: WORKER TID #%d Waiting for a request\n", thread_id);
             pthread_cond_wait(&request_exists, &queuelock);
         }
-        printf("DEBUG: WORKER TID #%d handling request\n", thread_id);
+        //printf("DEBUG: WORKER TID #%d handling request\n", thread_id);
 
         // Start recording time
         start = getCurrentTimeInMills();
@@ -308,7 +308,7 @@ void * worker(void *arg) {
         memset(current_req.request,'\0',1024);
         strncpy(current_req.request, requests[req_next_to_retrieve].request, 1024);
 
-        printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
+        //printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
         // update index tracker for queue
         req_current_items--;
         req_next_to_retrieve = (req_next_to_retrieve + 1) % qlen;
@@ -318,11 +318,11 @@ void * worker(void *arg) {
 
         pthread_mutex_lock(&cachelock);
         // Get the data from the disk or the cache
-        printf("DEBUG: WORKER TID #%d trying to get cache index\n", thread_id);
+        //printf("DEBUG: WORKER TID #%d trying to get cache index\n", thread_id);
         cache_idx = getCacheIndex(current_req.request);
-        printf("DEBUG: WORKER TID #%d got cache index\n", thread_id);
+        //printf("DEBUG: WORKER TID #%d got cache index\n", thread_id);
         if (cache_idx!=-1) {
-            printf("DEBUG: WORKER TID #%d request is in cache\n", thread_id);
+            //printf("DEBUG: WORKER TID #%d request is in cache\n", thread_id);
             // Req is in cache
             snprintf(cache_hit_miss, 4, "HIT");
             content = cache[cache_idx].content;
@@ -331,9 +331,9 @@ void * worker(void *arg) {
         
         else {
             // Req is not in cache
-            printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
+            //printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
             snprintf(cache_hit_miss, 5, "MISS");
-            printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
+            //printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
             
             strcpy(full_path, path);
             strcat(full_path, ((char *) current_req.request));
@@ -352,14 +352,15 @@ void * worker(void *arg) {
         char * cType = getContentType(full_path);
         int retError;
         if ((retError = return_result(current_req.fd, cType, content, contentBytes)) != 0) {
-            printf("DEBUG: error returned: message is %s, with return val of %d\n",content,retError);
+            //printf("DEBUG: error returned: message is %s, with return val of %d\n",content,retError);
             return_error(current_req.fd, content);
-            printf("DEBUG: error returned: message is %s, with return val of %d\n",content,retError);
+
+            //printf("DEBUG: error returned: message is %s, with return val of %d\n",content,retError);
         } else {
             sprintf(bytes_error,"%d",contentBytes);
         }
         req_num++;
-        printf("DEBUG: before logging in worker\n");
+        //printf("DEBUG: before logging in worker\n");
         snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]\n",
                  thread_id, req_num, current_req.fd, (char*) current_req.request,
                  bytes_error, elapsed, cache_hit_miss);
