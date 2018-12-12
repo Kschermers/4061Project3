@@ -188,6 +188,7 @@ int readFromDisk(char *path,char **content, int *size) {
     
     // Read from file into content buffer
     fread(*content, len, 1, file);
+    printf("DEBUG: content read from file\n");
     *content[len] = '\0';
 
     //printf("DEBUG: readFromDisk(): Length written to file is %d\n", le);
