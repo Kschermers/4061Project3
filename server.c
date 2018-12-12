@@ -335,7 +335,7 @@ void * worker(void *arg) {
             
             strcpy(full_path, path);
             strcat(full_path, ((char *) current_req.request));
-            if(readFromDisk(full_path,&content, &contentBytes) > 0){
+            if(readFromDisk(full_path,&content, &contentBytes) == 0){
                 printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
                 addIntoCache(current_req.request, content, contentBytes);
                 printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
