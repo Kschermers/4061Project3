@@ -4,7 +4,7 @@
  *  Group 1
  *  Names: Nicole Walker, Samuel Ball, Kadin Schermers
  *  X500s: walk0760, ballx188, scher528
- *  Date: 01/01/1970
+ *  Date: 12/12/2018
  */
 
 //hi
@@ -71,9 +71,9 @@ request_t *requests;
 
 /* ******************************* Questions ************************************/
 
-//TODO: When returnFromDisk retuerns NULL, fix hang
+//TODO: ask about return error
 
-//TODO: read images/gifs properly
+//TODO: ask about favicon
 
 
 /* ******************************************************************************/
@@ -113,7 +113,6 @@ int getCacheIndex(char *request){
 void addIntoCache(char *mybuf, char *memory , int memory_size){
     // It should add the request at an index according to the cache replacement policy
     // Make sure to allocate/free memeory when adding or replacing cache entries
-
     cache_entry_t toFree = cache[cache_next_to_store];
 
     if (toFree.flag == 1) {
@@ -123,7 +122,7 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
 
     toFree.request = (char*) malloc(strlen(mybuf));
     strcpy(toFree.request, mybuf);
-    printf("DEBUG: cache index %d assigned new request: %s\n",cache_next_to_store,toFree.request);
+//    printf("DEBUG: cache index %d assigned new request: %s\n",cache_next_to_store,toFree.request);
     toFree.content = (char*) malloc(memory_size);
     memcpy(toFree.content, memory, memory_size + 1);
     toFree.len = memory_size;
@@ -162,38 +161,34 @@ void initQueue(){
 // Add necessary arguments as needed
 int readFromDisk(char *path,char **content, int *size) {
     //  struct stat filestats;
-    printf("DEBUG: readFromDisk(): path %s being opened...\n", path);
+//    printf("DEBUG: readFromDisk(): path %s being opened...\n", path);
     FILE* file = fopen(path, "r");
     if (file == NULL) {
-        printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
-        
+//        printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
         *content = NULL;
-       
         *size = -1;
         return -1;
     } else {
-        printf("DEBUG: readFromDisk(): fopen() returned file\n");
+//        printf("DEBUG: readFromDisk(): fopen() returned file\n");
     }
     // Determine length of file
     fseek(file, 0, SEEK_END);
     long len = ftell(file);
     fseek(file, 0, SEEK_SET);
-    printf("DEBUG: readFromDisk(): Length of file is %d\n", len);
+//    printf("DEBUG: readFromDisk(): Length of file is %d\n", len);
 
     // Allocate space for content
     *content = (char *) malloc(len+1);
-    
-    printf("DEBUG: content malloced in RFD\n");
+//    printf("DEBUG: content malloced in RFD\n");
     *size = len;
     
     // Read from file into content buffer
     fread(*content, len, 1, file);
-    printf("DEBUG: content read from file\n");
+//    printf("DEBUG: content read from file\n");
 
     //printf("DEBUG: readFromDisk(): Length written to file is %d\n", le);
 
     return 0;
-    //}
 }
 
 /**********************************************************************************/
