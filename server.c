@@ -132,9 +132,9 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
           free(toFree.content);
      }
 
-     toFree.request = malloc(strlen(mybuf));
+     toFree.request = (char*) malloc(strlen(mybuf));
      toFree.request = mybuf;
-     toFree.content = malloc(strlen(memory));
+     toFree.content = (char*) malloc(strlen(memory));
      toFree.content = memory;
      toFree.len = memory_size;
 
@@ -280,7 +280,7 @@ void * worker(void *arg) {
 
   while (1) {
     pthread_mutex_lock(&queuelock);
-      request_t current_req;
+    request_t current_req;
     // wait until request queue is not empty
     while (req_next_to_store == req_next_to_retrieve) {
       // printf("DEBUG: WORKER TID #%d Waiting for a request\n", thread_id);
