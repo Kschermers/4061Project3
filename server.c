@@ -29,6 +29,9 @@
 #define MAX_CE 100
 #define INVALID -1
 #define BUFF_SIZE 1024
+#define MAX_PATH 2048
+#define MAX_ERROR 256
+#define MAX_LOG 128
 
 /*
  THE CODE STRUCTURE GIVEN BELOW IS JUST A SUGESSTION. FEEL FREE TO MODIFY AS NEEDED
@@ -59,7 +62,7 @@ int log_fd;
 // structs:
 typedef struct request_queue {
     int fd;
-    char request[1024];
+    char request[BUFF_SIZE];
 } request_t;
 
 typedef struct cache_entry {
@@ -236,8 +239,8 @@ int getCurrentTimeInMills() {
 // Function to receive the request from the client and add to the queue
 void * dispatch(void *arg) {
     int fd;
-    char filename[1024];
-    memset(filename,'\0',1024);
+    char filename[BUFF_SIZE];
+    memset(filename,'\0',BUFF_SIZE);
     while (1) {
         // Accept client connection
         int tid = *(int *) arg;
@@ -254,8 +257,8 @@ void * dispatch(void *arg) {
             }
 
             requests[req_next_to_store].fd = fd;
-            memset(requests[req_next_to_store].request,'\0',1024);
-            strncpy(requests[req_next_to_store].request, filename, 1024);
+            memset(requests[req_next_to_store].request,'\0',BUFF_SIZE);
+            strncpy(requests[req_next_to_store].request, filename, BUFF_SIZE;
             req_current_items++;
             req_next_to_store = (req_next_to_store + 1) % qlen;
             // printf("DEBUG: DISPATCH TID #%d successfully put request into queue\n", tid);
@@ -289,9 +292,9 @@ void * worker(void *arg) {
         pthread_mutex_lock(&queuelock);
         char *content;
         int contentBytes;
-        char full_path[2048];
-        char bytes_error[256];
-        char log_str[128];
+        char full_path[MAX_PATH];
+        char bytes_error[MAX_ERROR];
+        char log_str[MAX_LOG];
         request_t current_req;
         // wait until request queue is not empty
         while (req_next_to_store == req_next_to_retrieve) {
@@ -305,8 +308,8 @@ void * worker(void *arg) {
 
         // Get the request from the queue
         current_req.fd = requests[req_next_to_retrieve].fd;
-        memset(current_req.request,'\0',1024);
-        strncpy(current_req.request, requests[req_next_to_retrieve].request, 1024);
+        memset(current_req.request,'\0',BUFF_SIZE);
+        strncpy(current_req.request, requests[req_next_to_retrieve].request,BUFF_SIZE);
 
         //printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
         // update index tracker for queue
