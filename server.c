@@ -327,9 +327,11 @@ void * worker(void *arg) {
             snprintf(cache_hit_miss, 4, "HIT");
             content = cache[cache_idx].content;
             contentBytes = cache[cache_idx].len;
+            pthread_mutex_unlock(&cachelock);
         }
         
         else {
+            pthread_mutex_unlock(&cachelock);
             // Req is not in cache
             //printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
             snprintf(cache_hit_miss, 5, "MISS");
@@ -339,7 +341,9 @@ void * worker(void *arg) {
             strcat(full_path, ((char *) current_req.request));
             if(readFromDisk(full_path,&content, &contentBytes) == 0){
                 //printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
+                pthread_mutex_lock(&cachelock);
                 addIntoCache(current_req.request, content, contentBytes);
+                pthread_mutex_unlock(&cachelock);
                 //printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
             }
         }
@@ -360,7 +364,6 @@ void * worker(void *arg) {
             sprintf(bytes_error,"%d",contentBytes);
         }
         req_num++;
-	pthread_mutex_unlock(&cachelock);
 
 	pthread_mutex_lock(&loglock);
         //printf("DEBUG: before logging in worker\n");
