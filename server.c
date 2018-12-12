@@ -348,10 +348,10 @@ void * worker(void *arg) {
         // Return the result or set the error
         char * cType = getContentType(full_path);
         if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
-            itoa(contentBytes,bytes_error,10);
+            sprintf(bytes_error,"%d",contentBytes);
             return_error(current_req.fd, bytes_error);
         } else {
-            itoa(contentBytes,bytes_error,10);
+            sprintf(bytes_error,"%d",contentBytes);
         }
         req_num++;
         printf("DEBUG: before logging in worker\n");
