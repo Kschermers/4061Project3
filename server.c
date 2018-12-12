@@ -183,9 +183,10 @@ char* readFromDisk(char *path) {
   } else {
     //man fstat to understand what this is doing
     int bytes = filestats.st_size;
-
-    char *fileContent = (char *) malloc(bytes);
-    read(fd,fileContent,bytes);
+    printf("DEBUG: readFromDisk(): bytes = %d\n", bytes);
+    char *fileContent = (char *) malloc(sizeof(char) * bytes);
+    memset(fileContent, '\0', bytes);
+    fread(fileContent, bytes, 1, file);
     fileContent[bytes] = '\0';
     return fileContent;
   }
@@ -197,6 +198,12 @@ char* readFromDisk(char *path) {
 // Function to get the content type from the request
 char* getContentType(char * mybuf) {
      int len = strlen(mybuf);
+     if (mybuf == NULL) {
+       printf("DEBUG: getContentType(): input is NULL");
+     } else {
+       printf("DEBUG: Getting content type of %s\n", mybuf);
+     }
+
      // Should return the content type based on the file type in the request
      // (See Section 5 in Project description for more details)
      if(mybuf[len-5]=='.' && mybuf[len-4]=='h' && mybuf[len-3]=='t'&& mybuf[len-2]=='m'&& mybuf[len-1]=='l'){
@@ -337,7 +344,7 @@ void * worker(void *arg) {
     elapsed = stop - start;
 
     // Return the result or set the error
-    char * cType = getContentType(content);
+    char * cType = getContentType(current_req.request);
     if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
       return_error(current_req.fd, bytes_error);
     } else {
