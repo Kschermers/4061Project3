@@ -168,14 +168,13 @@ void initQueue(){
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
 char* readFromDisk(char *path) {
-  printf("DEBUG: readFromDisk(): stat struct being created...\n");
   struct stat filestats;
-  printf("DEBUG: readFromDisk(): file at path %s being opened...\n", path);
+  printf("DEBUG: readFromDisk(): path %s being opened...\n", path);
   FILE *file = fopen(path, "r");
   if (file == NULL) {
-    printf("DEBUG: readFromDisk(): file returned from fopen() is NULL\n", path);
+    printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
   } else {
-    printf("DEBUG: readFromDisk(): file opened at %s\n", path);
+    printf("DEBUG: readFromDisk(): fopen() returned file\n");
   }
   int fd = fileno(file);
   printf("DEBUG: readFromDisk(): fileno(file) returned %d\n", fd);
@@ -227,40 +226,37 @@ int getCurrentTimeInMills() {
 // Function to receive the request from the client and add to the queue
 void * dispatch(void *arg) {
   int fd;
-    char filename[1024];
-    memset(filename,'\0',1024);
+  char filename[1024];
+  memset(filename,'\0',1024);
   while (1) {
     // Accept client connection
     int tid = *(int *) arg;
-    printf("DEBUG: DISPATCH TID #%d Attempting Connection\n", tid);
+    // printf("DEBUG: DISPATCH TID #%d Attempting Connection\n", tid);
     fd =  accept_connection();
     // Get request from the client
     if (get_request(fd, filename) == 0) {
-      printf("DEBUG: DISPATCH TID #%d get_request() succeeded\n", tid);
+      //printf("DEBUG: DISPATCH TID #%d get_request() succeeded\n", tid);
 
-    //Critical Section
-    pthread_mutex_lock(&queuelock);
+      //Critical Section
+      pthread_mutex_lock(&queuelock);
       while(req_current_items == qlen){
-        printf("DEBUG: DISPATCH TID #%d waiting for space in request queue\n", tid);
         pthread_cond_wait(&space_for_request, &queuelock);
       }
-      printf("DEBUG: DISPATCH TID #%d putting request into queue\n", tid);
-        requests[req_next_to_store].fd = fd;
-        memset(requests[req_next_to_store].request,'\0',1024);
-        strncpy(requests[req_next_to_store].request, filename, 1024);
-        req_current_items++;
-        req_next_to_store = (req_next_to_store + 1) % qlen;
-      printf("DEBUG: DISPATCH TID #%d successfully put request into queue\n", tid);
-        pthread_mutex_unlock(&queuelock);
+
+      requests[req_next_to_store].fd = fd;
+      memset(requests[req_next_to_store].request,'\0',1024);
+      strncpy(requests[req_next_to_store].request, filename, 1024);
+      req_current_items++;
+      req_next_to_store = (req_next_to_store + 1) % qlen;
+      // printf("DEBUG: DISPATCH TID #%d successfully put request into queue\n", tid);
+      pthread_mutex_unlock(&queuelock);
       pthread_cond_broadcast(&request_exists);
 
     } else {
-      printf("DEBUG: DISPATCH TID #%d get_request() failed\n", tid);
+      // printf("DEBUG: DISPATCH TID #%d get_request() failed\n", tid);
     }
-
-
-    }
-    return NULL;
+  }
+  return NULL;
 }
 
 /**********************************************************************************/
@@ -286,7 +282,7 @@ void * worker(void *arg) {
 
     // wait until request queue is not empty
     while (req_next_to_store == req_next_to_retrieve) {
-      printf("DEBUG: WORKER TID #%d Waiting for a request\n", thread_id);
+      // printf("DEBUG: WORKER TID #%d Waiting for a request\n", thread_id);
       pthread_cond_wait(&request_exists, &queuelock);
     }
     printf("DEBUG: WORKER TID #%d handling request\n", thread_id);
