@@ -124,10 +124,10 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
 
     toFree.request = (char*) malloc(strlen(mybuf));
     strcpy(toFree.request, mybuf);
-    
+
     toFree.content = (char*) malloc(memory_size);
     memcpy(toFree.content, memory, memory_size + 1);
-    
+
     toFree.len = memory_size;
 
     toFree.flag = 1;
@@ -172,7 +172,7 @@ int readFromDisk(char *path,char **content, int *size) {
         return -1;
     } else {
 
-    
+
     // Determine length of file
     fseek(file, 0, SEEK_END);
     long len = ftell(file);
@@ -181,7 +181,7 @@ int readFromDisk(char *path,char **content, int *size) {
     // Allocate space for content
     *content = (char *) malloc(len+1);
     *size = len;
-    
+
     // Read from file into content buffer
     fread(*content, len, 1, file);
     return 0;
@@ -240,12 +240,11 @@ void * dispatch(void *arg) {
 
             requests[req_next_to_store].fd = fd;
             memset(requests[req_next_to_store].request,'\0',BUFF_SIZE);
-            strncpy(requests[req_next_to_store].request, filename, BUFF_SIZE;
+            strncpy(requests[req_next_to_store].request, filename, BUFF_SIZE);
             req_current_items++;
             req_next_to_store = (req_next_to_store + 1) % qlen;
             pthread_mutex_unlock(&queuelock);
             pthread_cond_broadcast(&request_exists);
-
         }
     }
     return NULL;
@@ -260,16 +259,17 @@ void * worker(void *arg) {
     int cache_idx;
     int thread_id = *(int *) arg;
     int req_num = 0;
-   
+
     char cache_hit_miss[5];
-    
+
     while (1) {
-        
+
         pthread_mutex_lock(&queuelock);
         char *content;
         int contentBytes;
         char full_path[MAX_PATH];
         char bytes_error[MAX_ERROR];
+        bool file_exists = false;
         char log_str[MAX_LOG];
         request_t current_req;
         // wait until request queue is not empty
@@ -293,7 +293,7 @@ void * worker(void *arg) {
         pthread_cond_broadcast(&space_for_request);
 
         pthread_mutex_lock(&cachelock);
-        
+
         // Get the data from the disk or the cache
         cache_idx = getCacheIndex(current_req.request);
 
@@ -303,18 +303,25 @@ void * worker(void *arg) {
             snprintf(cache_hit_miss, 4, "HIT");
             content = cache[cache_idx].content;
             contentBytes = cache[cache_idx].len;
+
+            file_exists = true;
+            memset(bytes_error, '\0', MAX_ERROR);
+            sprintf(bytes_error,"%d",contentBytes);
+
             pthread_mutex_unlock(&cachelock);
         }
-        
+
+
         else {
             pthread_mutex_unlock(&cachelock);
             // Req is not in cache
+
             snprintf(cache_hit_miss, 5, "MISS");
-            
+
             strcpy(full_path, path);
             strcat(full_path, ((char *) current_req.request));
             if(readFromDisk(full_path,&content, &contentBytes) == 0){
-                
+                file_exists = true;
                 pthread_mutex_lock(&cachelock);
                 addIntoCache(current_req.request, content, contentBytes);
                 pthread_mutex_unlock(&cachelock);
@@ -324,14 +331,18 @@ void * worker(void *arg) {
         // Stop recording the time
         stop = getCurrentTimeInMills();
         elapsed = stop - start;
-	
+
         // Return the result or set the error
         char * cType = getContentType(full_path);
         int retError;
         if ((retError = return_result(current_req.fd, cType, content, contentBytes)) != 0) {
             return_error(current_req.fd, content);
-
+            if (!file_exists) {
+              memset(bytes_error, '\0', MAX_ERROR);
+              sprintf(bytes_error, "File does not exist");
+            }
         } else {
+            memset(bytes_error, '\0', MAX_ERROR);
             sprintf(bytes_error,"%d",contentBytes);
         }
         req_num++;
@@ -435,6 +446,6 @@ int main(int argc, char **argv) {
     pthread_cond_destroy(&request_exists);
     pthread_cond_destroy(&space_for_request);
     deleteCache();
-    
+
     return 0;
 }
