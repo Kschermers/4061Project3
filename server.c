@@ -112,13 +112,7 @@ int getCacheIndex(char *request){
   return -1;
 }
 
-void IncrementCacheCounter() {
-    cache_next_to_store++;
 
-    if (cache_next_to_store == cache_entries) {
-        cache_next_to_store = 0;
-    }
-}
 
 // Function to add the request and its file content into the cache
 void addIntoCache(char *mybuf, char *memory , int memory_size){
@@ -134,6 +128,7 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
 
      toFree.request = (char*) malloc(strlen(mybuf));
      toFree.request = mybuf;
+    printf("DEBUG: cache index %d assigned new request: %s\n",cache_next_to_store,toFree.request);
      toFree.content = (char*) malloc(strlen(memory));
      toFree.content = memory;
      toFree.len = memory_size;
@@ -141,7 +136,10 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
      toFree.flag = 1;
 
      cache[cache_next_to_store] = toFree;
-     IncrementCacheCounter();
+    free(toFree.request);
+    free(toFree.content);
+    free(toFree.len);
+    cache_next_to_store = (cache_next_to_store + 1) % cache_entries;
 }
 
 // clear the memory allocated to the cache
