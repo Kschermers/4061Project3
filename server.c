@@ -77,12 +77,7 @@ request_t *requests;
 
 /* ******************************* Questions ************************************/
 
-//TODO: ask about return error/logging when file does not exist
-
-//TODO: ask about favicon
-
-//TODO: ask about disk quota
-
+//TODO: Turn  in
 
 /* ******************************************************************************/
 
@@ -103,10 +98,9 @@ void * dynamic_pool_size_update(void *arg) {
 int getCacheIndex(char *request){
     int i;
     for(i = 0; i < cache_entries; i++) {
-        //printf("DEBUG: getCacheIndex(): comparing to index %d in cache\n", i);
+
         if (cache[i].request != NULL) {
-            //printf("DEBUG: content of cache request: %s at cache index %d\n",cache[i].request,i);
-            //printf("DEBUG: content of incoming request: %s\n",request);
+
             if (strcmp(cache[i].request, request) == 0) {
                 return i;
             }
@@ -130,9 +124,10 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
 
     toFree.request = (char*) malloc(strlen(mybuf));
     strcpy(toFree.request, mybuf);
-//    printf("DEBUG: cache index %d assigned new request: %s\n",cache_next_to_store,toFree.request);
+    
     toFree.content = (char*) malloc(memory_size);
     memcpy(toFree.content, memory, memory_size + 1);
+    
     toFree.len = memory_size;
 
     toFree.flag = 1;
@@ -168,35 +163,29 @@ void initQueue(){
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
 int readFromDisk(char *path,char **content, int *size) {
-    //  struct stat filestats;
-//    printf("DEBUG: readFromDisk(): path %s being opened...\n", path);
+
     FILE* file = fopen(path, "r");
     if (file == NULL) {
-//        printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
+
         *content = NULL;
         *size = -1;
         return -1;
     } else {
-//        printf("DEBUG: readFromDisk(): fopen() returned file\n");
-    }
+
+    
     // Determine length of file
     fseek(file, 0, SEEK_END);
     long len = ftell(file);
     fseek(file, 0, SEEK_SET);
-//    printf("DEBUG: readFromDisk(): Length of file is %d\n", len);
 
     // Allocate space for content
     *content = (char *) malloc(len+1);
-//    printf("DEBUG: content malloced in RFD\n");
     *size = len;
     
     // Read from file into content buffer
     fread(*content, len, 1, file);
-//    printf("DEBUG: content read from file\n");
-
-    //printf("DEBUG: readFromDisk(): Length written to file is %d\n", le);
-
     return 0;
+    }
 }
 
 /**********************************************************************************/
@@ -205,11 +194,6 @@ int readFromDisk(char *path,char **content, int *size) {
 // Function to get the content type from the request
 char* getContentType(char * mybuf) {
     int len = strlen(mybuf);
-    //if (mybuf == NULL) {
-        //printf("DEBUG: getContentType(): input is NULL");
-    //} else {
-        //printf("DEBUG: Getting content type of %s\n", mybuf);
-    //}
 
     // Should return the content type based on the file type in the request
     // (See Section 5 in Project description for more details)
@@ -244,11 +228,9 @@ void * dispatch(void *arg) {
     while (1) {
         // Accept client connection
         int tid = *(int *) arg;
-        // printf("DEBUG: DISPATCH TID #%d Attempting Connection\n", tid);
         fd =  accept_connection();
         // Get request from the client
         if (get_request(fd, filename) == 0) {
-            //printf("DEBUG: DISPATCH TID #%d get_request() succeeded\n", tid);
 
             //Critical Section
             pthread_mutex_lock(&queuelock);
@@ -261,12 +243,9 @@ void * dispatch(void *arg) {
             strncpy(requests[req_next_to_store].request, filename, BUFF_SIZE;
             req_current_items++;
             req_next_to_store = (req_next_to_store + 1) % qlen;
-            // printf("DEBUG: DISPATCH TID #%d successfully put request into queue\n", tid);
             pthread_mutex_unlock(&queuelock);
             pthread_cond_broadcast(&request_exists);
 
-        } else {
-            // printf("DEBUG: DISPATCH TID #%d get_request() failed\n", tid);
         }
     }
     return NULL;
@@ -276,12 +255,9 @@ void * dispatch(void *arg) {
 
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
+
     int start, stop, elapsed;
     int cache_idx;
-
-
-    // temp variables for logging
-    
     int thread_id = *(int *) arg;
     int req_num = 0;
    
@@ -298,10 +274,8 @@ void * worker(void *arg) {
         request_t current_req;
         // wait until request queue is not empty
         while (req_next_to_store == req_next_to_retrieve) {
-            // printf("DEBUG: WORKER TID #%d Waiting for a request\n", thread_id);
             pthread_cond_wait(&request_exists, &queuelock);
         }
-        //printf("DEBUG: WORKER TID #%d handling request\n", thread_id);
 
         // Start recording time
         start = getCurrentTimeInMills();
@@ -311,7 +285,6 @@ void * worker(void *arg) {
         memset(current_req.request,'\0',BUFF_SIZE);
         strncpy(current_req.request, requests[req_next_to_retrieve].request,BUFF_SIZE);
 
-        //printf("DEBUG: WORKER TID #%d got request out of queue\n", thread_id);
         // update index tracker for queue
         req_current_items--;
         req_next_to_retrieve = (req_next_to_retrieve + 1) % qlen;
@@ -320,12 +293,12 @@ void * worker(void *arg) {
         pthread_cond_broadcast(&space_for_request);
 
         pthread_mutex_lock(&cachelock);
+        
         // Get the data from the disk or the cache
-        //printf("DEBUG: WORKER TID #%d trying to get cache index\n", thread_id);
         cache_idx = getCacheIndex(current_req.request);
-        //printf("DEBUG: WORKER TID #%d got cache index\n", thread_id);
+
         if (cache_idx!=-1) {
-            //printf("DEBUG: WORKER TID #%d request is in cache\n", thread_id);
+
             // Req is in cache
             snprintf(cache_hit_miss, 4, "HIT");
             content = cache[cache_idx].content;
@@ -336,18 +309,15 @@ void * worker(void *arg) {
         else {
             pthread_mutex_unlock(&cachelock);
             // Req is not in cache
-            //printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
             snprintf(cache_hit_miss, 5, "MISS");
-            //printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
             
             strcpy(full_path, path);
             strcat(full_path, ((char *) current_req.request));
             if(readFromDisk(full_path,&content, &contentBytes) == 0){
-                //printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
+                
                 pthread_mutex_lock(&cachelock);
                 addIntoCache(current_req.request, content, contentBytes);
                 pthread_mutex_unlock(&cachelock);
-                //printf("DEBUG: WORKER TID #%d added into cache\n", thread_id);
             }
         }
 
@@ -359,17 +329,15 @@ void * worker(void *arg) {
         char * cType = getContentType(full_path);
         int retError;
         if ((retError = return_result(current_req.fd, cType, content, contentBytes)) != 0) {
-            //printf("DEBUG: error returned: message is %s, with return val of %d\n",content,retError);
             return_error(current_req.fd, content);
 
-            //printf("DEBUG: error returned: message is %s, with return val of %d\n",content,retError);
         } else {
             sprintf(bytes_error,"%d",contentBytes);
         }
         req_num++;
 
-	pthread_mutex_lock(&loglock);
-        //printf("DEBUG: before logging in worker\n");
+        pthread_mutex_lock(&loglock);
+
         snprintf(log_str, MAX_LOG, "[%d][%d][%d][%s][%s][%dms][%s]\n",
                  thread_id, req_num, current_req.fd, (char*) current_req.request,
                  bytes_error, elapsed, cache_hit_miss);
@@ -466,7 +434,7 @@ int main(int argc, char **argv) {
     pthread_mutex_destroy(&loglock);
     pthread_cond_destroy(&request_exists);
     pthread_cond_destroy(&space_for_request);
-	//do we need to delete queue
     deleteCache();
+    
     return 0;
 }
