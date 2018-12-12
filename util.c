@@ -296,10 +296,6 @@ int return_error(int fd, char *buf) {
    // then close the connection
 
    FILE *stream = fdopen(fd,"w");
-    
-    char cwd[1024];
-    getcwd(cwd);
-    printf("DEBUG: RETURN ERROR: cwd is: %s\n",cwd);
 
    if (stream == NULL){
       printf("Failed to open stream.\n");

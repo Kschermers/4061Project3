@@ -353,7 +353,7 @@ void * worker(void *arg) {
         if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
             int retError = return_error(current_req.fd, content);
             strcpy(bytes_error,"unspecified");
-            printf("DEBUG: error returned: message is %s, with return val of %d\n",bytes_error,retError);
+            printf("DEBUG: error returned: message is %s, with return val of %d\n",content,retError);
         } else {
             sprintf(bytes_error,"%d",contentBytes);
         }
