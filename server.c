@@ -136,7 +136,7 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
      toFree.flag = 1;
 
      cache[cache_next_to_store] = toFree;
-    
+
     cache_next_to_store = (cache_next_to_store + 1) % cache_entries;
 }
 
@@ -318,8 +318,9 @@ void * worker(void *arg) {
       printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
       snprintf(cache_hit_miss, 5, "MISS");
       printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
-      char* full_path;
-      full_path = strcat(path, ((char *) current_req.request));
+      char full_path[2048];
+      strcpy(full_path, path);
+      strcat(full_path, ((char *) current_req.request));
       content = readFromDisk(full_path);
       if (content == NULL) {
         printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id, content);
