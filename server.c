@@ -71,9 +71,11 @@ request_t *requests;
 
 /* ******************************* Questions ************************************/
 
-//TODO: ask about return error
+//TODO: ask about return error/logging when file does not exist
 
 //TODO: ask about favicon
+
+//TODO: ask about disk quota
 
 
 /* ******************************************************************************/
