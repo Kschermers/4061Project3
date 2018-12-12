@@ -71,16 +71,10 @@ request_t *requests;
 
 /* ******************************* Questions ************************************/
 
-//TODO: understand content versus request
+//TODO: When returnFromDisk retuerns NULL, fix hang
 
+//TODO: read images/gifs properly
 
-//all we care about is the readout from the file no matter what it is,
-//request -> read cache/disk -> content -> return to web
-//fstat = number of bytes of a file -> this as return of readFromDisk?
-
-//TODO: complete readFromDisk()
-
-//TODO: other stuff
 
 /* ******************************************************************************/
 
