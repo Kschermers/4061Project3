@@ -278,7 +278,7 @@ void * worker(void *arg) {
 
 
     // temp variables for logging
-    char log_str[128];
+    
     int thread_id = *(int *) arg;
     int req_num = 0;
    
@@ -291,6 +291,7 @@ void * worker(void *arg) {
         int contentBytes;
         char full_path[2048];
         char bytes_error[256];
+        char log_str[128];
         request_t current_req;
         // wait until request queue is not empty
         while (req_next_to_store == req_next_to_retrieve) {
