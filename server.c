@@ -267,8 +267,7 @@ void * dispatch(void *arg) {
 void * worker(void *arg) {
   int start, stop, elapsed;
   int cache_idx;
-  cache_entry_t current_entry;
-  request_t current_req;
+
 
   // temp variables for logging
   char log_str[128];
@@ -281,7 +280,8 @@ void * worker(void *arg) {
 
   while (1) {
     pthread_mutex_lock(&queuelock);
-
+      cache_entry_t current_entry;
+      request_t current_req;
     // wait until request queue is not empty
     while (req_next_to_store == req_next_to_retrieve) {
       // printf("DEBUG: WORKER TID #%d Waiting for a request\n", thread_id);
@@ -369,8 +369,8 @@ void * worker(void *arg) {
 
 
    
-      current_entry = NULL;
-        pthread_mutex_unlock(&cachelock);
+     
+     pthread_mutex_unlock(&cachelock);
   }
   return NULL;
 }
