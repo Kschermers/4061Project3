@@ -172,6 +172,7 @@ char* readFromDisk(char *path) {
     FILE *file = fopen(path, "r");
     if (file == NULL) {
         printf("DEBUG: readFromDisk(): fopen() returned NULL\n");
+        return NULL;
     } else {
         printf("DEBUG: readFromDisk(): fopen() returned file\n");
     }
