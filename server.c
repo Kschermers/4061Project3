@@ -340,7 +340,7 @@ void * worker(void *arg) {
         elapsed = stop - start;
 
         // Return the result or set the error
-        char * cType = getContentType(current_req.request);
+        char * cType = getContentType(full_path);
         if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
             return_error(current_req.fd, bytes_error);
         } else {
