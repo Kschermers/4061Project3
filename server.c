@@ -319,13 +319,13 @@ void * worker(void *arg) {
             content = cache[cache_idx].content;
             contentBytes = cache[cache_idx].len;
         }
-
+        char full_path[2048];
         else {
             // Req is not in cache
             printf("DEBUG: WORKER TID #%d request is NOT in cache\n", thread_id);
             snprintf(cache_hit_miss, 5, "MISS");
             printf("DEBUG: WORKER TID #%d trying to get request from disk\n", thread_id);
-            char full_path[2048];
+            
             strcpy(full_path, path);
             strcat(full_path, ((char *) current_req.request));
             if(readFromDisk(full_path,&content, &contentBytes) > 0){
