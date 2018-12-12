@@ -103,7 +103,7 @@ int getCacheIndex(char *request){
     printf("DEBUG: getCacheIndex(): comparing to index %d in cache\n", i);
     if (cache[i].request != NULL) {
         printf("DEBUG: content of cache request: %s at cache index %d\n",cache[i].request,i);
-        printf("DEBUG: content of incoming request: %s/n",request);
+        printf("DEBUG: content of incoming request: %s\n",request);
       if (strcmp(cache[i].request, request) == 0) {
         return i;
       }
