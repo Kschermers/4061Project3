@@ -281,14 +281,16 @@ void * worker(void *arg) {
     char log_str[128];
     int thread_id = *(int *) arg;
     int req_num = 0;
-    char bytes_error[256];
+   
     char cache_hit_miss[5];
     
     while (1) {
+        
         pthread_mutex_lock(&queuelock);
         char *content;
         int contentBytes;
         char full_path[2048];
+         char bytes_error[256];
         request_t current_req;
         // wait until request queue is not empty
         while (req_next_to_store == req_next_to_retrieve) {
@@ -348,7 +350,6 @@ void * worker(void *arg) {
         // Return the result or set the error
         char * cType = getContentType(full_path);
         if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
-            sprintf(bytes_error,"%d",contentBytes);
             return_error(current_req.fd, bytes_error);
         } else {
             sprintf(bytes_error,"%d",contentBytes);
