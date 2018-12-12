@@ -332,11 +332,11 @@ void * worker(void *arg) {
             strcat(full_path, ((char *) current_req.request));
             content = readFromDisk(full_path);
             if (content == NULL) {
-                printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id, content);
+                printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id);
                 pthread_mutex_unlock(&cachelock);
                 return NULL;
             } else {
-                printf("DEBUG: WORKER TID #%d: readFromDisk() returned some content\n", thread_id, content);
+                printf("DEBUG: WORKER TID #%d: readFromDisk() returned some content\n", thread_id);
             }
             contentBytes = strlen(content);
             printf("DEBUG: WORKER TID #%d length of content found\n", thread_id);
