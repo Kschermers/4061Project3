@@ -367,6 +367,7 @@ void * worker(void *arg) {
                 printf("DEBUG: WORKER TID #%d: readFromDisk() returned NULL\n", thread_id, content);
           }
     }
+  }
   return NULL;
 }
 
