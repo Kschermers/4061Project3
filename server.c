@@ -324,7 +324,11 @@ void * worker(void *arg) {
                 file_exists = true;
                 pthread_mutex_lock(&cachelock);
                 addIntoCache(current_req.request, content, contentBytes);
+                
                 pthread_mutex_unlock(&cachelock);
+                
+                memset(bytes_error, '\0', MAX_ERROR);
+                sprintf(bytes_error,"%d",contentBytes);
             }
         }
 
@@ -341,9 +345,6 @@ void * worker(void *arg) {
               memset(bytes_error, '\0', MAX_ERROR);
               sprintf(bytes_error, "File does not exist");
             }
-        } else {
-            memset(bytes_error, '\0', MAX_ERROR);
-            sprintf(bytes_error,"%d",contentBytes);
         }
         req_num++;
 
