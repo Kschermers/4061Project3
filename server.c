@@ -350,7 +350,7 @@ void * worker(void *arg) {
         // Return the result or set the error
         char * cType = getContentType(full_path);
         if (return_result(current_req.fd, cType, content, contentBytes) != 0) {
-            int retError = return_error(current_req.fd, bytes_error);
+            int retError = return_error(current_req.fd, content);
             printf("DEBUG: error returned: message is %s, with return val of %d\n",bytes_error,retError);
         } else {
             sprintf(bytes_error,"%d",contentBytes);
