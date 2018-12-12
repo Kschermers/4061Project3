@@ -182,8 +182,8 @@ int readFromDisk(char *path,char **content, int *size) {
     *content = (char *) malloc(len+1);
     *size = len;
     // Read from file into content buffer
-    fread(content, 1, len, file);
-    content[len] = '\0';
+    fread(content, len, 1, file);
+    *content[len] = '\0';
 
     printf("DEBUG: readFromDisk(): Length written to file is %d\n", strlen(content));
 
