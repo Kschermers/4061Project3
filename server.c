@@ -138,7 +138,6 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
      cache[cache_next_to_store] = toFree;
     free(toFree.request);
     free(toFree.content);
-    free(toFree.len);
     cache_next_to_store = (cache_next_to_store + 1) % cache_entries;
 }
 
