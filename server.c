@@ -370,7 +370,7 @@ void * worker(void *arg) {
 
 	pthread_mutex_lock(&loglock);
         //printf("DEBUG: before logging in worker\n");
-        snprintf(log_str, 256, "[%d][%d][%d][%s][%s][%dms][%s]\n",
+        snprintf(log_str, MAX_LOG, "[%d][%d][%d][%s][%s][%dms][%s]\n",
                  thread_id, req_num, current_req.fd, (char*) current_req.request,
                  bytes_error, elapsed, cache_hit_miss);
         int log_len = strlen(log_str);
