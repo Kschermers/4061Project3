@@ -122,10 +122,10 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
         free(toFree.content);
     }
 
-    toFree.request = (char*) malloc(strlen(mybuf));
+    toFree.request = (char*) malloc(strlen(mybuf)+1);
     strcpy(toFree.request, mybuf);
 
-    toFree.content = (char*) malloc(memory_size);
+    toFree.content = (char*) malloc(memory_size+1);
     memcpy(toFree.content, memory, memory_size + 1);
 
     toFree.len = memory_size;
@@ -179,11 +179,12 @@ int readFromDisk(char *path,char **content, int *size) {
     fseek(file, 0, SEEK_SET);
 
     // Allocate space for content
-    *content = (char *) malloc(len+1);
+    *content = (char *) malloc(len + 1);
     *size = len;
 
     // Read from file into content buffer
     fread(*content, len, 1, file);
+    //scontent[len] = '\0';
     return 0;
     }
 }
@@ -323,12 +324,8 @@ void * worker(void *arg) {
             if(readFromDisk(full_path,&content, &contentBytes) == 0){
                 file_exists = true;
                 pthread_mutex_lock(&cachelock);
-                addIntoCache(current_req.request, content, contentBytes);
-                
+                addIntoCache(current_req.request, content, contentBytes+1);
                 pthread_mutex_unlock(&cachelock);
-                
-                memset(bytes_error, '\0', MAX_ERROR);
-                sprintf(bytes_error,"%d",contentBytes);
             }
         }
 
@@ -345,6 +342,9 @@ void * worker(void *arg) {
               memset(bytes_error, '\0', MAX_ERROR);
               sprintf(bytes_error, "File does not exist");
             }
+        } else {
+            memset(bytes_error, '\0', MAX_ERROR);
+            sprintf(bytes_error,"%d",contentBytes);
         }
         req_num++;
 
